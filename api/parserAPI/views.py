@@ -27,7 +27,7 @@ def instantParse(request):
         command = "dig " + message + " | jc --dig"
         output = subprocess.check_output(command, shell=True, text=True)
 
-        parse_input = parseInput.objects.create(p_input=output)
+        parse_input = parseInput.objects.create(p_input=output) 
         parse_input.time_created = x
         parse_input.time_finished = timezone.now()
 
