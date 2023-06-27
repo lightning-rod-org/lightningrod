@@ -12,6 +12,7 @@ import os
 import subprocess
 from datetime import datetime
 from django.utils import timezone
+from rest_framework.decorators import api_view
 
 
 @csrf_exempt
@@ -33,51 +34,32 @@ def instantParse(request):
         serializer = InputSerializer(parse_input)
         return JsonResponse(serializer.data)
 
-    # elif(request.method == 'POST'):
-    #     # parse the incoming information
-    #     data = JSONParser().parse(request)
-    #     # instanciate with the serializer
-    #     serializer = InputSerializer(data=data)
-    #     # check if the sent information is okay
-    #     if(serializer.is_valid()):
-    #         # if okay, save it on the database
-    #         serializer.save()
-    #         # provide a Json Response with the data that was saved
-    #         return JsonResponse(serializer.data, status=201)
-    #         # provide a Json Response with the necessary error information
-    #     return JsonResponse(serializer.errors, status=400)
-
-
 @csrf_exempt
+@api_view(['POST'])
+
 def addParse(request):
-    '''
-    List all task snippets
-    '''
-    # if(request.method == 'GET'):
-    #     # get all the tasks
-    #     x =  timezone.now()
-    #     tasks = parseInput.objects.all()
-    #     # serialize the task data
-    #     command = "dig " + message + " | jc --dig"
-    #     output = subprocess.check_output(command, shell=True, text=True)
-    #     parse_input = parseInput.objects.create(p_input=output)
+    if(request.method == 'POST'):
+        # parse the incoming information
+        data = JSONParser().parse(request)
 
-    #     serializer = InputSerializer(tasks, many=True)
-    #     # return a Json response
-    #     return JsonResponse(serializer.data,safe=False)
-    if request.method == 'GET':
-        message = request.GET.get('message', '')
+        data['time_created'] = timezone.now()
+        data['time_finished'] = None  
+        message = data['p_input']
         command = "dig " + message + " | jc --dig"
-        output = subprocess.check_output(command, shell=True, text=True)
+        data['p_output'] = subprocess.check_output(command, shell=True, text=True)
 
-        parse_input = parseInput.objects.create(p_input=output, time_created=timezone.now(), time_finished=timezone.now())
-        parse_input.save()
 
-        serializer = InputSerializer(parse_input)
-        return JsonResponse(serializer.data, status=201)
-    
-    # Handle other HTTP methods if needed
+        # instanciate with the serializer
+        serializer = InputSerializer(data=data)
+        # check if the sent information is okay
+        if(serializer.is_valid()):
+            # if okay, save it on the database
+            serializer.save()
+            # provide a Json Response with the data that was saved
+            return JsonResponse(serializer.data, status=201)
+            # provide a Json Response with the necessary error information
+        return JsonResponse(serializer.errors, status=400)
 
-    # Return a default response if none of the conditions above are met
-    return JsonResponse({'message': 'Invalid request'}, status=400)
+
+
 
