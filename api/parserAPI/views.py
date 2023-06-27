@@ -47,7 +47,25 @@ def instantParse(request):
     #         # provide a Json Response with the necessary error information
     #     return JsonResponse(serializer.errors, status=400)
 
+'''
+def findParse(request):
+    
+    List all task snippets
+    
+    if request.method == 'GET':
+        message = request.GET.get('message', '')
+        x =  timezone.now()
+        # Perform the desired operation on p_input
+        command = "find " + message + " | jc --find"
+        output = subprocess.check_output(command, shell=True, text=True)
 
+        parse_input = parseInput.objects.create(p_input=output)
+        parse_input.time_created = x
+        parse_input.time_finished = timezone.now()
+
+        serializer = InputSerializer(parse_input)
+        return JsonResponse(serializer.data)
+'''
 @csrf_exempt
 def addParse(request):
     '''
