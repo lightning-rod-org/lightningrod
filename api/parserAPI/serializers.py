@@ -3,4 +3,4 @@ from .models import parseInput
 class InputSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = parseInput
-        fields = ['p_input', 'time_created', 'time_finished', 'p_output']
+        fields = ['ticket_number', 'p_input', 'time_created', 'time_finished', 'p_output']

@@ -21,19 +21,34 @@ def instantParse(request):
     List all task snippets
     '''
     if request.method == 'GET':
-        message = request.GET.get('message', '')
-        x =  timezone.now()
-        # Perform the desired operation on p_input
+    #     message = request.GET.get('message', '')
+
+    #     x =  timezone.now()
+    #     # Perform the desired operation on p_input
+    #     command = "dig " + message + " | jc --dig"
+    #     output = subprocess.check_output(command, shell=True, text=True)
+    #     numb = parseInput.objects.count() + 1
+    #     parse_input = parseInput.objects.create(p_input=message, ticket_number=numb, p_output=output) 
+    #    # parse_input.p_input = str(message)
+    #     #parse_input['ticket_number'] = parseInput.objects.count() + 1
+    #     parse_input.time_created = x
+    #     parse_input.time_finished = timezone.now()
+        data = JSONParser().parse(request)
+        data['ticket_number'] = parseInput.objects.count() + 1
+        data['time_created'] = timezone.now()
+        data['time_finished'] = None  
+        message = data['p_input']
         command = "dig " + message + " | jc --dig"
-        output = subprocess.check_output(command, shell=True, text=True)
-
-        parse_input = parseInput.objects.create(p_input=output) 
-        parse_input.time_created = x
-        parse_input.time_finished = timezone.now()
-
-        serializer = InputSerializer(parse_input)
-        return JsonResponse(serializer.data)
-
+        data['p_output'] = subprocess.check_output(command, shell=True, text=True)
+        serializer = InputSerializer(data=data)
+        # check if the sent information is okay
+        if(serializer.is_valid()):
+            # if okay, save it on the database
+            # provide a Json Response with the data that was saved
+            return JsonResponse(serializer.data, status=201)
+            # provide a Json Response with the necessary error information
+        return JsonResponse(serializer.errors, status=400)
+         
 @csrf_exempt
 @api_view(['POST'])
 
@@ -41,7 +56,7 @@ def addParse(request):
     if(request.method == 'POST'):
         # parse the incoming information
         data = JSONParser().parse(request)
-
+        data['ticket_number'] = parseInput.objects.count() + 1
         data['time_created'] = timezone.now()
         data['time_finished'] = None  
         message = data['p_input']
