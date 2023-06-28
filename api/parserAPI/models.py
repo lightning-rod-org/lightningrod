@@ -7,7 +7,7 @@ class parseInput(models.Model):
     #title
     ticket_number = models.IntegerField()
     p_input = models.CharField(max_length=100)
-    time_created = models.DateTimeField(default=datetime.now, blank=True)
+    time_created = models.DateTimeField(auto_now_add=True)
     time_finished = models.DateTimeField(null=True, blank=True)
     p_output = models.CharField(max_length=1000)
 
