@@ -3,15 +3,18 @@ from .views import instantParse
 from .models import parseInput
 from django.urls import reverse
 from django.utils import timezone
-from django.views import addParse
-import subprocess
-class Test(TestCase):
-   def test_does_not_exist(self):
-       #response = self.client.post("/test/", {"title": "new idea"}, format="json")
-       response = self.client.get("/api/instantParse/test")
-       self.assertEqual(response.status_code, 404)
 
-   def test_exists(self):
+class Test(TestCase):
+    def test_does_not_exist(self):
+       #response = self.client.post("/test/", {"title": "new idea"}, format="json")
+       factory = RequestFactory()
+
+       req = factory.get("/api/instantParse/test")
+       #print("THIS IS REQ:" + str(req))
+       #response = instantParse()
+       self.assertEqual(req.status_code, 404)
+
+    def test_exists(self):
        factory = RequestFactory()
        data = { 'message' : 'www.dog.com'}
        request= factory.get(reverse(instantParse), data=data)
@@ -20,11 +23,7 @@ class Test(TestCase):
        self.assertEqual(response.status_code, 200)
        obj = parseInput.objects.first()
        self.assertIsNotNone(obj.time_created)
-        
-   def test_parse_command(self):
-       data = {
-            'p_input': 'example input',
-        }
+
 
     #TODO 
 
