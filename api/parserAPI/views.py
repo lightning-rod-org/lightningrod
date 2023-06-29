@@ -13,6 +13,8 @@ import subprocess
 from datetime import datetime
 from django.utils import timezone
 from rest_framework.decorators import api_view
+from ipware import get_client_ip
+from django.http import HttpResponse
 
 
 @csrf_exempt
@@ -57,10 +59,11 @@ def addParse(request):
         # parse the incoming information
         data = JSONParser().parse(request)
         data['ticket_number'] = parseInput.objects.count() + 1
+        data['client_ip'] = request.META.get('REMOTE_ADDR')
         data['time_created'] = timezone.now()
-        data['time_finished'] = None  
         message = data['p_input']
         command = "dig " + message + " | jc --dig"
+        data['time_finished'] = timezone.now()  
         data['p_output'] = subprocess.check_output(command, shell=True, text=True)
 
 

@@ -6,8 +6,9 @@ from datetime import datetime
 class parseInput(models.Model):
     #title
     ticket_number = models.IntegerField()
+    client_ip = models.CharField(max_length=50)
     p_input = models.CharField(max_length=100)
-    time_created = models.DateTimeField(auto_now_add=True)
+    time_created = models.DateTimeField(null=True, blank=True)
     time_finished = models.DateTimeField(null=True, blank=True)
     p_output = models.CharField(max_length=1000)
 
