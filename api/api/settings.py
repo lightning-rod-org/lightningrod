@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'parserAPI',
     'rest_framework',
+    'ipware'
 ]
 
 MIDDLEWARE = [
