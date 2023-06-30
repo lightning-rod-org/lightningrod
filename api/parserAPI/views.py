@@ -23,11 +23,7 @@ def instantParse(request):
     '''
     List all task snippets
     '''
-<<<<<<< Updated upstream
-    if request.method == 'GET':
-=======
     if(request.method == 'GET'):
->>>>>>> Stashed changes
         data = JSONParser().parse(request)
         data['ticket_number'] = parseInput.objects.count() + 1
         data['client_ip'] = request.META.get('REMOTE_ADDR')
