@@ -4,7 +4,7 @@ from datetime import datetime
 # Create your models here.
 
 class parseInput(models.Model):
-    #title
+    #title 
     ticket_number = models.IntegerField()
     client_ip = models.CharField(max_length=50)
     p_input = models.CharField(max_length=100)

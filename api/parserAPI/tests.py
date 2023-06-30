@@ -11,8 +11,8 @@ class Test(TestCase):
 
        req = factory.get("/api/instantParse/test")
        #print("THIS IS REQ:" + str(req))
-       #response = instantParse()
-       self.assertEqual(req.status_code, 404)
+       response = instantParse(req)
+       self.assertEqual(response.status_code, 404)
 
     def test_exists(self):
        factory = RequestFactory()

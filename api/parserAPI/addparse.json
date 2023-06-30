@@ -1,0 +1,8 @@
+{
+    "ticket_number": 1,
+    "client_ip": "127.0.0.1",
+    "p_input": "",
+    "time_created": "2023-06-30T14:25:26.191774Z",
+    "time_finished": "2023-06-30T14:25:26.191778Z",
+    "p_output": "[{\"id\":4607,\"opcode\":\"QUERY\",\"status\":\"NXDOMAIN\",\"flags\":[\"qr\",\"rd\",\"ra\"],\"query_num\":1,\"answer_num\":0,\"authority_num\":0,\"additional_num\":1,\"opt_pseudosection\":{\"edns\":{\"version\":0,\"flags\":[],\"udp\":65494}},\"question\":{\"name\":\"www.dog.com.\",\"class\":\"IN\",\"type\":\"A\"},\"query_time\":0,\"server\":\"127.0.0.53#53(127.0.0.53) (UDP)\",\"when\":\"Fri Jun 30 14:25:26 UTC 2023\",\"rcvd\":40,\"when_epoch\":1688135126,\"when_epoch_utc\":1688135126}]"
+}
