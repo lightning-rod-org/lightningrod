@@ -23,18 +23,6 @@ def instantParse(request):
     List all task snippets
     '''
     if request.method == 'GET':
-    #     message = request.GET.get('message', '')
-
-    #     x =  timezone.now()
-    #     # Perform the desired operation on p_input
-    #     command = "dig " + message + " | jc --dig"
-    #     output = subprocess.check_output(command, shell=True, text=True)
-    #     numb = parseInput.objects.count() + 1
-    #     parse_input = parseInput.objects.create(p_input=message, ticket_number=numb, p_output=output) 
-    #    # parse_input.p_input = str(message)
-    #     #parse_input['ticket_number'] = parseInput.objects.count() + 1
-    #     parse_input.time_created = x
-    #     parse_input.time_finished = timezone.now()
         data = JSONParser().parse(request)
         data['ticket_number'] = parseInput.objects.count() + 1
         data['time_created'] = timezone.now()
