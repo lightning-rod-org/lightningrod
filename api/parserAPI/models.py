@@ -1,17 +1,18 @@
 from django.db import models
 from datetime import datetime
 
+
 # Create your models here.
 
 class parseInput(models.Model):
-    #title 
+    # title 
     ticket_number = models.IntegerField()
     client_ip = models.CharField(max_length=50)
     p_input = models.CharField(max_length=100)
     time_created = models.DateTimeField(null=True, blank=True)
     time_finished = models.DateTimeField(null=True, blank=True)
-    p_output = models.CharField(max_length=1000)
+    p_output = models.JSONField(null=True)
 
     def __str__(self):
-        #return the task title
+        # return the task title
         return self.p_input
