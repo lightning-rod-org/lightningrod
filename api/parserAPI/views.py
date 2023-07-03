@@ -15,7 +15,7 @@ import os
 
 
 @csrf_exempt
-@api_view(['Get'])
+@api_view(['GET'])
 def instantParse(request):
     """
     List all task snippets
@@ -63,7 +63,7 @@ http://localhost:8000/api/submit/?=test
 
 
 @csrf_exempt
-@api_view(['POST'])
+@api_view(['POST', 'GET'])
 def addParse(request):
     if request.method == 'POST':
         # parse the incoming information

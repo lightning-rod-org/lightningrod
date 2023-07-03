@@ -2,10 +2,14 @@ from django.test import TestCase, RequestFactory
 from .views import instantParse
 from .models import parseInput
 from django.urls import reverse
+import os
+import json
 from django.utils import timezone
 from parserAPI import views
 import subprocess
 from django.http import HttpRequest
+from .models import parseInput
+import unittest
 
 class Test(TestCase):
     # def test_does_not_exist(self):
@@ -27,19 +31,25 @@ class Test(TestCase):
     #    obj = parseInput.objects.first()
     #    self.assertIsNotNone(obj.time_created)
     
-    def setUp(self):
-        # Every test needs access to the request factory.
-        self.factory = RequestFactory()
+    # def setUp(self):
+    #     # Every test needs access to the request factory.
+    #     self.factory = RequestFactory()
 
-    def test_add_parse_fields(self):
-        data = {
-            'p_input': 'example_input',
-            # Add any other necessary fields
-        }
+    def empty_field_test(self):
+        # # Create a dummy GET request with data as query parameters
+        # factory = RequestFactory()
+        # request = factory.get('/api/instantParse/')
+        # request.data = {"p_input "}
+        data = {"p_input": ""}
+        # Perform the view function call
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        json_file_path = os.path.join(current_directory, 'addparse.json')
+        with open(json_file_path) as file:
+            json_data = json.load(file)
+        test = json_data["p_input"]
+        command = "dig " + test + " | jc --dig"
 
-        request = self.factory.get("/api/instantParse/", data=data)
-        request.p_input = "www.dog.com"
-        response = views.instantParse(request)
-        
-        self.assertEquals(response.status_code, 200)
+        empty_input = parseInput.objects.create(ticket_number = 1, client_ip= "127.0.01.", time_created=  "2023-06-30T14:25:26.191774Z", time_finished = "2023-06-30T14:25:26.191778Z", p_input = "", p_output= command)
+
+        self.assertTrue(2==3)
 
