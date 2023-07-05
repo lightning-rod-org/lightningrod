@@ -8,14 +8,12 @@ class parseInput(models.Model):
     # title 
     ticket_number = models.IntegerField()
     client_ip = models.CharField(max_length=50)
-    #p_input = models.CharField(max_length=100)
     time_created = models.DateTimeField(null=True, blank=True)
     time_finished = models.DateTimeField(null=True, blank=True)
     p_output = models.JSONField(null=True)
     filename = models.CharField(max_length=50)
     parser = models.CharField(max_length=50)
 
-
     def __str__(self):
         # return the task title
-        return self.p_input
+        return self.parser
