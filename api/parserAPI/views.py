@@ -77,8 +77,13 @@ def addParse(request):
         text = file.read()  # read entire text file into one string
         command = data['parser']  # decide which jc parser should be used for the text file
         data['time_finished'] = timezone.now()
-        data['p_output'] = jc.parse(command, text)  # parse the given data with jc using the provided command
 
+        # parse the given data with jc using the provided command
+        #if command in jc.parser_mod_list(False, False):
+        data['p_output'] = jc.parse(command, text)
+        #else:
+            #data['p_output'] = "Parser does not exist"
+        print(data['p_output'])
         # instanciate the serializer
         serializer = InputSerializer(data=data)
         # check if the information is okay
