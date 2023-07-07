@@ -69,6 +69,7 @@ def addParse(request):
     if request.method == 'POST':
         # Handle file upload
         file_serializer = FileSerializer(data=request.data)
+        print(file_serializer)
         if file_serializer.is_valid():
             file_serializer.save()
             # Access the uploaded file content
@@ -85,7 +86,7 @@ def addParse(request):
         data['time_finished'] = timezone.now()
         command = data['parser']
         data['file_content'] = file_content
-        print(file_content)
+        #print(file_content)
         data['p_output'] = str(jc.parse(command, file_content))
         
         
