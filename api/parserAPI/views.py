@@ -14,6 +14,7 @@ import json
 from rest_framework.parsers import FileUploadParser
 from rest_framework import serializers
 
+from django.core.files.uploadedfile import TemporaryUploadedFile
 
 @csrf_exempt
 @api_view(['Get'])
@@ -70,13 +71,11 @@ def addParse(request):
         # Handle file upload
         file_serializer = FileSerializer(data=request.data)
         if file_serializer.is_valid():
-            file_serializer.save()
-            # Access the uploaded file content
-            file_content = file_serializer.instance.file.read().decode('utf-8')
-            # Perform any necessary processing on the file content
+            file_obj: TemporaryUploadedFile = request.FILES['file']  # Assuming the file field is named 'file'
+            file_content = file_obj.read().decode('utf-8')
         else:
             return JsonResponse(file_serializer.errors, status=400)
-        
+
         # Handle JSON data
         data = request.data
         data['ticket_number'] = parseInput.objects.count() + 1
@@ -87,12 +86,12 @@ def addParse(request):
         data['file_content'] = file_content
         print(file_content)
         data['p_output'] = str(jc.parse(command, file_content))
-        
-        
+
         serializer = InputSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
         else:
             return JsonResponse(serializer.errors, status=400)
+
 
