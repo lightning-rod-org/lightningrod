@@ -1,4 +1,3 @@
 api/api/__pycache__/
 api/parserAPI/__pycache__/
 api/db.sqlite3
-api/parserAPI/migrations/__pycache__
