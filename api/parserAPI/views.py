@@ -67,26 +67,28 @@ http://localhost:8000/api/submit/?=test
 @csrf_exempt
 @api_view(['POST'])
 def addParse(request):
+    global file_content
     if request.method == 'POST':
         # Handle file upload
-        file_serializer = FileSerializer(data=request.data)
+        data = request.data
+        file_serializer = FileSerializer(data=data)
         print(file_serializer)
         if file_serializer.is_valid():
             file_obj: TemporaryUploadedFile = request.FILES['file']  # Assuming the file field is named 'file'
             file_content = file_obj.read().decode('utf-8')
         else:
-            return JsonResponse(file_serializer.errors, status=400)
+            print("man fuck this shit")
+            # return JsonResponse(file_serializer.errors, status=400)
 
         # Handle JSON data
-        data = request.data
         data['ticket_number'] = parseInput.objects.count() + 1
         data['client_ip'] = request.META.get('REMOTE_ADDR')
         data['time_created'] = timezone.now()
         data['time_finished'] = timezone.now()
         command = data['parser']
+        assert isinstance(file_content, str)
         data['file_content'] = file_content
-        #print(file_content)
-        data['p_output'] = str(jc.parse(command, file_content))
+        data['p_output'] = str(jc.parse(command, file_content)).replace("\'", "\"")
 
         serializer = InputSerializer(data=data)
         if serializer.is_valid():
