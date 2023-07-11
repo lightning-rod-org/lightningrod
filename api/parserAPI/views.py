@@ -13,8 +13,8 @@ import os
 import json
 from rest_framework.parsers import FileUploadParser
 from rest_framework import serializers
-
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.http import QueryDict
 
 @csrf_exempt
 @api_view(['Get'])
@@ -67,28 +67,27 @@ http://localhost:8000/api/submit/?=test
 @csrf_exempt
 @api_view(['POST'])
 def addParse(request):
-    global file_content
     if request.method == 'POST':
         # Handle file upload
         data = request.data
         file_serializer = FileSerializer(data=data)
-        print(file_serializer)
         if file_serializer.is_valid():
             file_obj: TemporaryUploadedFile = request.FILES['file']  # Assuming the file field is named 'file'
             file_content = file_obj.read().decode('utf-8')
         else:
-            print("man fuck this shit")
-            # return JsonResponse(file_serializer.errors, status=400)
+            return JsonResponse(file_serializer.errors, status=400)
 
         # Handle JSON data
-        data['ticket_number'] = parseInput.objects.count() + 1
-        data['client_ip'] = request.META.get('REMOTE_ADDR')
-        data['time_created'] = timezone.now()
-        data['time_finished'] = timezone.now()
-        command = data['parser']
+        data["ticket_number"] = parseInput.objects.count() + 1
+        data["client_ip"] = request.META.get('REMOTE_ADDR')
+        data["time_created"] = timezone.now()
+        data["time_finished"] = timezone.now()
+        command = data["parser"]
         assert isinstance(file_content, str)
-        data['file_content'] = file_content
-        data['p_output'] = str(jc.parse(command, file_content)).replace("\'", "\"")
+        data["p_output"] = jc.parse(command, file_content)
+        
+        # Data from query dictionary to dictionary.
+        data = QueryDict.dict(data)
 
         serializer = InputSerializer(data=data)
         if serializer.is_valid():

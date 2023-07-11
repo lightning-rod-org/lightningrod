@@ -16,7 +16,7 @@ class parseInput(models.Model):
     def __str__(self):
         return self.parser
 
-    file_content = models.CharField(max_length=1500)
+    
 
 
 class File(models.Model):
