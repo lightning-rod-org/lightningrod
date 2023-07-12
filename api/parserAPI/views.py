@@ -2,19 +2,14 @@
 from rest_framework.parsers import JSONParser
 # To bypass having a CSRF token
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, QueryDict
 from .serializers import InputSerializer, FileSerializer
 from .models import parseInput
-from .models import File
 import jc
 from django.utils import timezone
 from rest_framework.decorators import api_view
 import os
-import json
-from rest_framework.parsers import FileUploadParser
-from rest_framework import serializers
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.http import QueryDict
 
 @csrf_exempt
 @api_view(['Get'])
@@ -48,7 +43,6 @@ def instantParse(request):
             # provide a Json Response with the necessary error information
         return JsonResponse(serializer.errors, status=400)
 
-
 """
 Julian J.
 At the moment this method instantly parses any data given in a text file
@@ -62,7 +56,6 @@ this should be changed into an uploaded file.
 Also url for this request is:
 http://localhost:8000/api/submit/?=test
 """
-
 
 @csrf_exempt
 @api_view(['POST'])
@@ -84,9 +77,12 @@ def addParse(request):
         data["time_finished"] = timezone.now()
         command = data["parser"]
         assert isinstance(file_content, str)
-        data["p_output"] = jc.parse(command, file_content)
+        try:
+            data["p_output"] = jc.parse(command, file_content)
+        except:
+            data["p_output"] = None
         
-        # Data from query dictionary to dictionary.
+        # Convert Data from query dictionary to dictionary.
         data = QueryDict.dict(data)
 
         serializer = InputSerializer(data=data)

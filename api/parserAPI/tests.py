@@ -1,27 +1,16 @@
-from django.test import TestCase, RequestFactory, client
-from rest_framework.test import APIClient
-from parserAPI.views import addParse
-from .models import parseInput
+from rest_framework.test import APIClient, APITestCase
 from django.urls import reverse
-import os
-import json
-from django.utils import timezone
-from parserAPI import views
-import subprocess
-from django.http import HttpRequest
-from .models import parseInput
-import unittest
-from django.core.files.uploadedfile import SimpleUploadedFile, InMemoryUploadedFile
-from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 
+class Test(APITestCase):
 
-class Test(TestCase):
-
+    def setUp(self):
+        # Create an API client object, and gets URL of post view.
+        self.client = APIClient()
+        self.post_url = reverse("parserAPI:addParse")
+    
     # Tests a successful post request.
     def test_addParse_success(self):
-        # Gets the app name and the view function to use.
-        url = reverse("parserAPI:addParse")
-
         # Populate the file with this data.
         file_data = """
                     docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
@@ -59,13 +48,37 @@ class Test(TestCase):
             "parser": "ifconfig",
             "file": file_obj,
         }
-        
-        # Create an API client object using Django's test.
-        client = APIClient()
 
         # Create a post request that will use the url, data, and the multipart format type for files.
-        response = client.post(url, data=data, format="multipart") 
+        response = self.client.post(self.post_url, data=data, format="multipart") 
 
-        # Checks if the post request was saved and correct content-type.
+        # Checks if the post request was saved and correct content-type.APISimpleTestCase
         self.assertEqual(response['Content-Type'], "application/json")
         self.assertEqual(response.status_code, 201)
+
+    # Tests to make sure the file serializer works properly.
+    def test_addParse_bad_file_format(self):
+        file_data = "uid=1000(jjack3032) gid=1000(jjack3032) groups=1000(jjack3032),27(sudo)"
+        file_obj = SimpleUploadedFile("id_data.txt", file_data.encode(), content_type="text/plain")
+        
+        data = {
+            "parser": "id",
+            "file": file_obj
+        }
+
+        response = self.client.post(self.post_url, data=data, format="json")
+
+        self.assertEqual(response.status_code, 400)
+    
+    # Tests to make sure a bad parser produces an error.
+    def test_addParse_bad_parser(self):
+        file_data = "uid=1000(jjack3032) gid=1000(jjack3032) groups=1000(jjack3032),27(sudo)"
+        file_obj = SimpleUploadedFile("id_data.txt", file_data.encode(), content_type="text/plain")
+
+        data = {
+            "parser": "notValid",
+            "file": file_obj
+        }
+
+        response = self.client.post(self.post_url, data=data, format="multipart")
+        self.assertEqual(response.status_code, 400)
