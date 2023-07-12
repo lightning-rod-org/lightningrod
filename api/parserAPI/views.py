@@ -43,20 +43,6 @@ def instantParse(request):
             # provide a Json Response with the necessary error information
         return JsonResponse(serializer.errors, status=400)
 
-"""
-Julian J.
-At the moment this method instantly parses any data given in a text file
-given the filename, the jc command needed, and p_input.
-To-do
-1)remove need for p_input variable is not needed in current version.
-2)This version is currently reading a file that is is the app's working directory,
-this should be changed into an uploaded file.
-3)The method above called instant parse is a misnomer in the sense that that's exactly what this method does.
-
-Also url for this request is:
-http://localhost:8000/api/submit/?=test
-"""
-
 @csrf_exempt
 @api_view(['POST'])
 def addParse(request):

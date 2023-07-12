@@ -52,7 +52,7 @@ class Test(APITestCase):
         # Create a post request that will use the url, data, and the multipart format type for files.
         response = self.client.post(self.post_url, data=data, format="multipart") 
 
-        # Checks if the post request was saved and correct content-type.APISimpleTestCase
+        # Checks if the post request was saved and correct content-type.
         self.assertEqual(response['Content-Type'], "application/json")
         self.assertEqual(response.status_code, 201)
 
@@ -60,7 +60,7 @@ class Test(APITestCase):
     def test_addParse_bad_file_format(self):
         file_data = "uid=1000(jjack3032) gid=1000(jjack3032) groups=1000(jjack3032),27(sudo)"
         file_obj = SimpleUploadedFile("id_data.txt", file_data.encode(), content_type="text/plain")
-        
+
         data = {
             "parser": "id",
             "file": file_obj
