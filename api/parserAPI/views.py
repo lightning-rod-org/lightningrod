@@ -3,13 +3,15 @@ from rest_framework.parsers import JSONParser
 # To bypass having a CSRF token
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, QueryDict
-from .serializers import InputSerializer, FileSerializer
-from .models import parseInput
+from .serializers import InputSerializer, FileSerializer, TicketSerializer, AdditionalFieldsSerializer
+from .models import parseInput, Ticket
 import jc
 from django.utils import timezone
 from rest_framework.decorators import api_view
 import os
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from background_task import background
+import json
 
 @csrf_exempt
 @api_view(['Get'])
@@ -43,9 +45,86 @@ def instantParse(request):
             # provide a Json Response with the necessary error information
         return JsonResponse(serializer.errors, status=400)
 
+#@background()
+def parseData(request, file_content, ticket):
+    data = request.data
+    # Handle JSON data
+    data = {
+        "ticket": ticket,
+        "client_ip": request.META.get("REMOTE_ADDR"),
+        "time_created": timezone.now(),
+        "time_finished": timezone.now(),
+        "parser": data["parser"],
+        "p_output": "Empty"
+    }
+    
+    assert isinstance(file_content, str)
+    try:
+        parsed_output = {
+            "p_output": jc.parse(data["parser"], file_content)
+        }
+        data.update(parsed_output)
+    except:
+        data.update({"p_output": None})
+    # Convert Data from query dictionary to dictionary.
+
+    serializer = AdditionalFieldsSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return data
+    return {}
+
+#def get_status(ticket_number):
+
 @csrf_exempt
-@api_view(['POST'])
+@api_view(['GET','POST'])
 def addParse(request):
+    if request.method == 'GET':
+        number = request.GET.get('ticket_number')  # Assuming the ticket number is passed as a query parameter
+        current = Ticket.objects.filter(ticket_number=number).values()
+
+        if current['status'] == "Completed":
+            return current['p_output']
+        return current['status']
+        #status = get_status(ticket_number)  # Your logic to retrieve the status based on the ticket number
+
+        #response_data = {
+            #'ticket_number': ticket_number,
+            ##'status': status,
+        #}
+
+        #check ticket number, if ticket number is valid, then check status.
+        #if status is done, then we would want to return the information.
+        #if it is still processing, then return status as "In Progress"
+
+        #if ticket number and status successfully returns, then 200.
+    elif request.method == 'POST':
+        
+        # Create a ticket number with the status starting.
+        ticket_number = Ticket.objects.count() + 1
+
+        file_serializer = FileSerializer(data=request.data)
+        if file_serializer.is_valid():
+            file_obj: TemporaryUploadedFile = request.FILES['file']  # Assuming the file field is named 'file'
+            file_content = file_obj.read().decode('utf-8')
+        else:
+            return JsonResponse(file_serializer.errors, status=400)
+        
+        data = {
+            "ticket_number": ticket_number,
+            "parser": request.data["parser"],
+            "status": "Starting"
+        }
+
+        # Check to see if this is valid, and successfully create it.
+        ticket_serializer = TicketSerializer(data=data)
+        if ticket_serializer.is_valid():
+            ticket_serializer.save()
+            parseData(request, file_content, ticket_number)
+            return JsonResponse(ticket_serializer.data, status=201)
+        return JsonResponse(ticket_serializer.data, status=400)
+    
+    '''
     if request.method == 'POST':
         # Handle file upload
         data = request.data
@@ -77,5 +156,5 @@ def addParse(request):
             return JsonResponse(serializer.data, status=201)
         else:
             return JsonResponse(serializer.errors, status=400)
-
+    '''
 
