@@ -4,7 +4,7 @@ from rest_framework.parsers import JSONParser
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, QueryDict
 from .serializers import InputSerializer, FileSerializer, TicketSerializer, AdditionalFieldsSerializer
-from .models import parseInput, Ticket
+from .models import parseInput, Ticket, AdditionalFields
 import jc
 from django.utils import timezone
 from rest_framework.decorators import api_view
@@ -12,6 +12,8 @@ import os
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from background_task import background
 import json
+
+
 
 @csrf_exempt
 @api_view(['Get'])
@@ -46,62 +48,58 @@ def instantParse(request):
         return JsonResponse(serializer.errors, status=400)
 
 #@background()
-def parseData(request, file_content, ticket):
-    data = request.data
-    # Handle JSON data
-    data = {
-        "ticket": ticket,
-        "client_ip": request.META.get("REMOTE_ADDR"),
-        "time_created": timezone.now(),
-        "time_finished": timezone.now(),
-        "parser": data["parser"],
-        "p_output": "Empty"
-    }
-    
+def parseData(request, file_content, passed_ticket):
+    additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(), time_finished=timezone.now())
+    additional_fields.client_ip = request.META.get("REMOTE_ADDR")
+    additional_fields.ticket.update_status("In Progress")
+    additional_fields.time_finished = timezone.now()
+
     assert isinstance(file_content, str)
     try:
-        parsed_output = {
-            "p_output": jc.parse(data["parser"], file_content)
-        }
-        data.update(parsed_output)
+        additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content)
     except:
-        data.update({"p_output": None})
+        additional_fields.p_output = {"p_output": None}
     # Convert Data from query dictionary to dictionary.
 
-    serializer = AdditionalFieldsSerializer(data=data)
-    if serializer.is_valid():
-        serializer.save()
-        return data
-    return {}
+    additional_fields.ticket.update_status("Completed")
+    serializer = AdditionalFieldsSerializer(data=additional_fields.__dict__)
+    if (serializer.is_valid()):
+        additional_fields.save()
+        return additional_fields
+    return None
 
-#def get_status(ticket_number):
+def get_status(ticket):
+    return ticket.status
 
 @csrf_exempt
 @api_view(['GET','POST'])
 def addParse(request):
     if request.method == 'GET':
         number = request.GET.get('ticket_number')  # Assuming the ticket number is passed as a query parameter
-        current = Ticket.objects.filter(ticket_number=number).values()
 
-        if current['status'] == "Completed":
-            return current['p_output']
-        return current['status']
-        #status = get_status(ticket_number)  # Your logic to retrieve the status based on the ticket number
-
-        #response_data = {
-            #'ticket_number': ticket_number,
-            ##'status': status,
-        #}
-
-        #check ticket number, if ticket number is valid, then check status.
-        #if status is done, then we would want to return the information.
-        #if it is still processing, then return status as "In Progress"
-
-        #if ticket number and status successfully returns, then 200.
+        try:
+            ticket = Ticket.objects.get(ticket_number=number)
+            if (get_status(ticket) == "Completed"):
+                additional_fields = AdditionalFields.objects.get(ticket=ticket)
+                response_data = {
+                    'ticket_number': ticket.ticket_number,
+                    'parser': ticket.parser,
+                    'status': ticket.status,
+                    'client_ip': additional_fields.client_ip,
+                    'time_created': additional_fields.time_created,
+                    'time_finished': additional_fields.time_finished,
+                    'p_output': additional_fields.p_output
+                }
+                return JsonResponse(response_data, status=200)
+            else:
+                return JsonResponse({'status': 'In Progress'}, status=400)
+        except (Ticket.DoesNotExist, AdditionalFields.DoesNotExist):
+            return JsonResponse({'error': 'Ticket not found'}, status=404)
     elif request.method == 'POST':
-        
         # Create a ticket number with the status starting.
-        ticket_number = Ticket.objects.count() + 1
+        data = request.data
+        ticket_number = Ticket.objects.count() + 1  # Get the next available ticket number
+        new_ticket = Ticket(ticket_number=ticket_number, parser=data.get('parser'), status='Starting')
 
         file_serializer = FileSerializer(data=request.data)
         if file_serializer.is_valid():
@@ -109,20 +107,15 @@ def addParse(request):
             file_content = file_obj.read().decode('utf-8')
         else:
             return JsonResponse(file_serializer.errors, status=400)
-        
-        data = {
-            "ticket_number": ticket_number,
-            "parser": request.data["parser"],
-            "status": "Starting"
-        }
 
-        # Check to see if this is valid, and successfully create it.
-        ticket_serializer = TicketSerializer(data=data)
+        ticket_serializer = TicketSerializer(data=new_ticket.__dict__)
         if ticket_serializer.is_valid():
             ticket_serializer.save()
-            parseData(request, file_content, ticket_number)
+            parseData(request, file_content, new_ticket)
+            
             return JsonResponse(ticket_serializer.data, status=201)
-        return JsonResponse(ticket_serializer.data, status=400)
+        else:
+            return JsonResponse(ticket_serializer.errors, status=400)
     
     '''
     if request.method == 'POST':

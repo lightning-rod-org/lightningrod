@@ -17,24 +17,20 @@ class parseInput(models.Model):
         return self.parser
 
 class Ticket(models.Model):
-    ticket_number = models.IntegerField()
-    parser = models.CharField(max_length=50)
-    status = models.CharField(max_length=20, default="Starting")
+    ticket_number = models.IntegerField(primary_key=True)
+    parser = models.CharField(max_length=100)
+    status = models.CharField(max_length=100, default='Starting')
+    #additional_fields = models.OneToOneField('AdditionalFields', null=True, blank=True, on_delete=models.CASCADE)
 
-    def is_completed(self):
-        return self.status == "Completed"
-    
-    def all_data(self):
-        if self.is_completed():
-            print("hi")
-        return {}
-    
+    def update_status(self, status):
+        self.status = status
+        self.save(update_fields=['status'])
+
 class AdditionalFields(models.Model):
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
-    client_ip = models.CharField(max_length=50)
-    time_created = models.DateTimeField(null=True, blank=True)
-    time_finished = models.DateTimeField(null=True, blank=True)
-    parser = models.CharField(max_length=50)
+    ticket = models.OneToOneField(Ticket, on_delete=models.CASCADE, related_name='additional_fields')
+    client_ip = models.CharField(max_length=100)
+    time_created = models.DateTimeField()
+    time_finished = models.DateTimeField()
     p_output = models.JSONField()
 
 class File(models.Model):
