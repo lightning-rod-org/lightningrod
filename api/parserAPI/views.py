@@ -13,8 +13,12 @@ import os
 import json
 from rest_framework.parsers import FileUploadParser
 from rest_framework import serializers
-
+from django.http import HttpResponse
+import asyncio
+import httpx
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from asgiref.sync import sync_to_async
+
 
 @csrf_exempt
 @api_view(['Get'])
@@ -65,8 +69,7 @@ http://localhost:8000/api/submit/?=test
 
 
 @csrf_exempt
-@api_view(['POST'])
-def addParse(request):
+async def addParse(request):
     if request.method == 'POST':
         # Handle file upload
         file_serializer = FileSerializer(data=request.data)
@@ -74,8 +77,8 @@ def addParse(request):
             file_obj: TemporaryUploadedFile = request.FILES['file']  # Assuming the file field is named 'file'
             file_content = file_obj.read().decode('utf-8')
         else:
-            return JsonResponse(file_serializer.errors, status=400)
-
+            # return JsonResponse(file_serializer.errors, status=400)
+            return JsonResponse(serializer.data, status=201)
         # Handle JSON data
         data = request.data
         data['ticket_number'] = parseInput.objects.count() + 1
@@ -85,13 +88,33 @@ def addParse(request):
         command = data['parser']
         data['file_content'] = file_content
         print(file_content)
-        data['p_output'] = str(jc.parse(command, file_content))
+        p_output =  await jc.parse(command, file_content)
+        data['p_output'] =  str(p_output)
 
         serializer = InputSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            #return JsonResponse(serializer.data, status=201)
             return JsonResponse(serializer.data, status=201)
         else:
-            return JsonResponse(serializer.errors, status=400)
+            #return JsonResponse(serializer.errors, status=400)
+            return HttpResponse("Hello, async Django!")
 
 
+async def asynctest():
+    for num in range(1, 6):
+        await asyncio.sleep(1)
+        print(num)
+    async with httpx.AsyncClient() as client:
+        r = await client.get("http://localhost:8000/api/asynctest/")
+        print(r)
+@csrf_exempt
+async def index(request):
+    # print(addParse(request))
+    # async with httpx.AsyncClient() as client:
+    #     await client.get("http://localhost:8000/api/submit/")
+    #     return HttpResponse("Hello, async Django!")
+    # loop = asyncio.get_event_loop()
+    # async_function = sync_to_async(addParse(request), thread_sensitive=False)
+    # await loop.create_task(async_function())
+    return HttpResponse("Hello, async Django!")
