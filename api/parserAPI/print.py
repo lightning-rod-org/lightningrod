@@ -1,7 +1,7 @@
 
-f = open("newfile.txt", "w")
+f = open("smaller_newfile.txt", "w")
 i = 0
-for i in range(20000):
+for i in range(10000):
     f.write("""
         docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
                 inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255

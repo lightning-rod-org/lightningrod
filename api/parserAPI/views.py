@@ -12,7 +12,8 @@ import os
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from background_task import background
 import json
-
+import threading, time
+from threading import Event
 
 
 @csrf_exempt
@@ -47,8 +48,9 @@ def instantParse(request):
             # provide a Json Response with the necessary error information
         return JsonResponse(serializer.errors, status=400)
 
-#@background()
+#@background(schedule=0)
 def parseData(request, file_content, passed_ticket):
+    print("hellooooooo")
     additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(), time_finished=timezone.now())
     additional_fields.client_ip = request.META.get("REMOTE_ADDR")
     additional_fields.ticket.update_status("In Progress")
@@ -57,16 +59,19 @@ def parseData(request, file_content, passed_ticket):
     assert isinstance(file_content, str)
     try:
         additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content)
+        #additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content
     except:
         additional_fields.p_output = {"p_output": None}
     # Convert Data from query dictionary to dictionary.
 
+    
     additional_fields.ticket.update_status("Completed")
     serializer = AdditionalFieldsSerializer(data=additional_fields.__dict__)
     if (serializer.is_valid()):
+        print("Data saved!")
         additional_fields.save()
-        return additional_fields
-    return None
+        return passed_ticket
+    print("Not valid!")
 
 def get_status(ticket):
     return ticket.status
@@ -92,7 +97,7 @@ def addParse(request):
                 }
                 return JsonResponse(response_data, status=200)
             else:
-                return JsonResponse({'status': 'In Progress'}, status=400)
+                return JsonResponse({'status': ticket.status}, status=200)
         except (Ticket.DoesNotExist, AdditionalFields.DoesNotExist):
             return JsonResponse({'error': 'Ticket not found'}, status=404)
     elif request.method == 'POST':
@@ -111,8 +116,16 @@ def addParse(request):
         ticket_serializer = TicketSerializer(data=new_ticket.__dict__)
         if ticket_serializer.is_valid():
             ticket_serializer.save()
-            parseData(request, file_content, new_ticket)
+
+            #python's multiprocessing library (cleaning up child processes) 
+            #celery (might not be active) avoid this for the time being because it may be too complicated.
+            #threading library (is_alive()), GIL one global lock, try using the database to track status, output etc
+                #might have to change some modules.
+                #test by spinning a background thread and sleep for a certain amount to see the status and prove threads working
+            thread = threading.Thread(target=parseData, args=(request, file_content, new_ticket), daemon=True)
+            thread.start()
             
+            print("what?")
             return JsonResponse(ticket_serializer.data, status=201)
         else:
             return JsonResponse(ticket_serializer.errors, status=400)
