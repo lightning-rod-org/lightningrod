@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-BACKGROUND_TASK_RUN_ASYNC = True
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,7 +40,6 @@ INSTALLED_APPS = [
     'parserAPI',
     'rest_framework',
     'ipware',
-    'background_task'
 ]
 
 MIDDLEWARE = [

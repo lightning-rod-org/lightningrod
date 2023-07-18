@@ -10,7 +10,6 @@ from django.utils import timezone
 from rest_framework.decorators import api_view
 import os
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from background_task import background
 import json
 import threading, time
 from threading import Event
