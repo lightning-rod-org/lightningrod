@@ -12,6 +12,8 @@ LightningRod currently supports a local dev version of the service. Begin by clo
 
 Run by using `python3 api/manage.py runserver`
 
+The service will be accessible at http://localhost:8000/api/
+
 ## Endpoints
 
 ### POST /submit
@@ -26,7 +28,7 @@ Save the `ticket_number` number value to request the status.
 
 ### GET /submit
 
-This returns the status of a submitted ticket. This takes one parameter in the body of the request.
+This returns the status of a submitted ticket. This takes one query parameter.
 
 `ticket_number`: This is the number value returned from the initial POST request.
 
