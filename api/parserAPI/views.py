@@ -10,6 +10,7 @@ from django.utils import timezone
 from rest_framework.decorators import api_view
 import os
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.utils.dateformat import format
 import json
 import threading, time
 from threading import Event
@@ -47,33 +48,32 @@ def instantParse(request):
             # provide a Json Response with the necessary error information
         return JsonResponse(serializer.errors, status=400)
 
-#@background(schedule=0)
+#Helper function to parse the data for extra fields.
 def parseData(request, file_content, passed_ticket):
-    print("hellooooooo")
-    additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(), time_finished=timezone.now())
+    additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(),
+                                                                time_finished=timezone.now())
     additional_fields.client_ip = request.META.get("REMOTE_ADDR")
     additional_fields.ticket.update_status("In Progress")
-    additional_fields.time_finished = timezone.now()
-
+    
     assert isinstance(file_content, str)
+    
+    # Check to make sure it is a valid parser.
     try:
         additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content)
-        #additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content
     except:
         additional_fields.p_output = {"p_output": None}
-    # Convert Data from query dictionary to dictionary.
-
     
+    # Update the status to compelte and time finished.
     additional_fields.ticket.update_status("Completed")
+    additional_fields.time_finished = timezone.now()
+
+    # Saves the additional fields.
     serializer = AdditionalFieldsSerializer(data=additional_fields.__dict__)
     if (serializer.is_valid()):
         print("Data saved!")
         additional_fields.save()
-        return passed_ticket
-    print("Not valid!")
-
-def get_status(ticket):
-    return ticket.status
+    else:
+        print("Not valid!")
 
 @csrf_exempt
 @api_view(['GET','POST'])
@@ -81,85 +81,57 @@ def addParse(request):
     if request.method == 'GET':
         number = request.GET.get('ticket_number')  # Assuming the ticket number is passed as a query parameter
 
+        # Get the ticket number, if it exists. 
         try:
             ticket = Ticket.objects.get(ticket_number=number)
-            if (get_status(ticket) == "Completed"):
+            response_data = {
+                'ticket_number': ticket.ticket_number,
+                'status': ticket.status,
+                'parser': ticket.parser
+            }
+
+            # If status complete, update with the rest of the fields.
+            if (ticket.status == "Completed"):
                 additional_fields = AdditionalFields.objects.get(ticket=ticket)
-                response_data = {
-                    'ticket_number': ticket.ticket_number,
-                    'parser': ticket.parser,
-                    'status': ticket.status,
+                response_data.update({
                     'client_ip': additional_fields.client_ip,
                     'time_created': additional_fields.time_created,
                     'time_finished': additional_fields.time_finished,
                     'p_output': additional_fields.p_output
-                }
+                })
                 return JsonResponse(response_data, status=200)
             else:
-                return JsonResponse({'status': ticket.status}, status=200)
+                response_data.update({
+                    'status': ticket.status
+                })
+                return JsonResponse(response_data, status=200)
+        # Error in finding ticket number.
         except (Ticket.DoesNotExist, AdditionalFields.DoesNotExist):
             return JsonResponse({'error': 'Ticket not found'}, status=404)
     elif request.method == 'POST':
-        # Create a ticket number with the status starting.
         data = request.data
         ticket_number = Ticket.objects.count() + 1  # Get the next available ticket number
+
+        # Create a ticket number with the status starting.
         new_ticket = Ticket(ticket_number=ticket_number, parser=data.get('parser'), status='Starting')
 
+        # Checks for a file.
         file_serializer = FileSerializer(data=request.data)
         if file_serializer.is_valid():
             file_obj: TemporaryUploadedFile = request.FILES['file']  # Assuming the file field is named 'file'
             file_content = file_obj.read().decode('utf-8')
         else:
             return JsonResponse(file_serializer.errors, status=400)
-
+        
+        # Checks to make sure it is a valid ticket.
         ticket_serializer = TicketSerializer(data=new_ticket.__dict__)
         if ticket_serializer.is_valid():
             ticket_serializer.save()
 
-            #python's multiprocessing library (cleaning up child processes) 
-            #celery (might not be active) avoid this for the time being because it may be too complicated.
-            #threading library (is_alive()), GIL one global lock, try using the database to track status, output etc
-                #might have to change some modules.
-                #test by spinning a background thread and sleep for a certain amount to see the status and prove threads working
+            #Create a new thread for each request.
             thread = threading.Thread(target=parseData, args=(request, file_content, new_ticket), daemon=True)
             thread.start()
-            
-            print("what?")
+
             return JsonResponse(ticket_serializer.data, status=201)
         else:
             return JsonResponse(ticket_serializer.errors, status=400)
-    
-    '''
-    if request.method == 'POST':
-        # Handle file upload
-        data = request.data
-        file_serializer = FileSerializer(data=data)
-        if file_serializer.is_valid():
-            file_obj: TemporaryUploadedFile = request.FILES['file']  # Assuming the file field is named 'file'
-            file_content = file_obj.read().decode('utf-8')
-        else:
-            return JsonResponse(file_serializer.errors, status=400)
-
-        # Handle JSON data
-        data["ticket_number"] = parseInput.objects.count() + 1
-        data["client_ip"] = request.META.get('REMOTE_ADDR')
-        data["time_created"] = timezone.now()
-        data["time_finished"] = timezone.now()
-        command = data["parser"]
-        assert isinstance(file_content, str)
-        try:
-            data["p_output"] = jc.parse(command, file_content)
-        except:
-            data["p_output"] = None
-        
-        # Convert Data from query dictionary to dictionary.
-        data = QueryDict.dict(data)
-
-        serializer = InputSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        else:
-            return JsonResponse(serializer.errors, status=400)
-    '''
-
