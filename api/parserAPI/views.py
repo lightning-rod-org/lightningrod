@@ -19,65 +19,6 @@ from threading import Event
 @csrf_exempt
 @api_view(['Get'])
 def instantParse(request):
-    """
-    List all task snippets
-    """
-    if request.method == 'GET':        
-        # parse the incoming information
-        data = JSONParser().parse(request)  # this error was getting thrown because of the url syntax, url should be
-        # http://localhost:8000/api/instantParse/
-        here = os.path.dirname(os.path.abspath(__file__))  # create file path directly to this directory
-        filename = os.path.join(here, data['filename'])  # create a new file name using the absolute path from above
-        file = open(filename, 'r')  # open file using combined attributes from above in read mode
-        data['ticket_number'] = parseInput.objects.count() + 1
-        data['client_ip'] = request.META.get('REMOTE_ADDR')
-        data['time_created'] = timezone.now()
-        text = file.read()  # read entire text file into one string
-        command = data['parser']  # decide which jc parser should be used for the text file
-        data['time_finished'] = timezone.now()
-        data['p_output'] = jc.parse(command, text)  # parse the given data with jc using the provided command
-
-        # instanciate with the serializer
-        serializer = InputSerializer(data=data)
-        # check if the information is okay
-        if serializer.is_valid():
-            # if okay, save it on the database
-            serializer.save()
-            # provide a Json Response with the data that was saved
-            return JsonResponse(serializer.data, status=201)
-            # provide a Json Response with the necessary error information
-        return JsonResponse(serializer.errors, status=400)
-
-#Helper function to parse the data for extra fields.
-def parseData(request, file_content, passed_ticket):
-    additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(),
-                                                                time_finished=timezone.now())
-    additional_fields.client_ip = request.META.get("REMOTE_ADDR")
-    additional_fields.ticket.update_status("In Progress")
-    
-    assert isinstance(file_content, str)
-    
-    # Check to make sure it is a valid parser.
-    try:
-        additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content)
-    except:
-        additional_fields.p_output = {"p_output": None}
-    
-    # Update the status to compelte and time finished.
-    additional_fields.ticket.update_status("Completed")
-    additional_fields.time_finished = timezone.now()
-
-    # Saves the additional fields.
-    serializer = AdditionalFieldsSerializer(data=additional_fields.__dict__)
-    if (serializer.is_valid()):
-        print("Data saved!")
-        additional_fields.save()
-    else:
-        print("Not valid!")
-
-@csrf_exempt
-@api_view(['GET','POST'])
-def addParse(request):
     if request.method == 'GET':
         number = request.GET.get('ticket_number')  # Assuming the ticket number is passed as a query parameter
 
@@ -108,7 +49,38 @@ def addParse(request):
         # Error in finding ticket number.
         except (Ticket.DoesNotExist, AdditionalFields.DoesNotExist):
             return JsonResponse({'error': 'Ticket not found'}, status=404)
-    elif request.method == 'POST':
+
+#Helper function to parse the data for extra fields.
+def parseData(request, file_content, passed_ticket):
+    additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(),
+                                                                time_finished=timezone.now())
+    additional_fields.client_ip = request.META.get("REMOTE_ADDR")
+    additional_fields.ticket.update_status("In Progress")
+    
+    assert isinstance(file_content, str)
+    
+    # Check to make sure it is a valid parser.
+    try:
+        additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content)
+    except:
+        additional_fields.p_output = {"p_output": None}
+    
+    # Update the status to compelte and time finished.
+    additional_fields.ticket.update_status("Completed")
+    additional_fields.time_finished = timezone.now()
+
+    # Saves the additional fields.
+    serializer = AdditionalFieldsSerializer(data=additional_fields.__dict__)
+    if (serializer.is_valid()):
+        print("Data saved!")
+        additional_fields.save()
+    else:
+        print("Not valid!")
+
+@csrf_exempt
+@api_view(['POST'])
+def addParse(request):
+    if request.method == 'POST':
         data = request.data
         ticket_number = Ticket.objects.count() + 1  # Get the next available ticket number
 
