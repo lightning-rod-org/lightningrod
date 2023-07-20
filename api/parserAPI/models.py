@@ -3,8 +3,8 @@ from django.db import models
 
 # Create your models here.
 class Ticket(models.Model):
-    ticket_number = models.CharField(max_length=36)
-    parser = models.CharField(max_length=100)
+    ticket_number = models.CharField(max_length=36, primary_key=True)
+    parser = models.CharField(max_length=100, default='unknown')
     status = models.CharField(max_length=100, default='Starting')
 
     def update_status(self, status):

@@ -52,6 +52,7 @@ def parseData(request, file_content, passed_ticket):
     additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(),
                                          time_finished=timezone.now())
     additional_fields.client_ip = request.META.get("REMOTE_ADDR")
+    print("I'm here")
     additional_fields.ticket.update_status("In Progress")
 
     assert isinstance(file_content, str)
@@ -62,7 +63,7 @@ def parseData(request, file_content, passed_ticket):
     except:
         additional_fields.p_output = {"p_output": None}
 
-    # Update the status to compelte and time finished.
+    # Update the status to complete and time finished.
     additional_fields.ticket.update_status("Completed")
     additional_fields.time_finished = timezone.now()
 
@@ -80,7 +81,8 @@ def parseData(request, file_content, passed_ticket):
 def addParse(request):
     if request.method == 'POST':
         data = request.data
-        ticket_number = uuid.uuid4()  # Get the next available ticket number
+        ticket_number = str(uuid.uuid4())  # Get the next available ticket number
+        print(ticket_number)
 
         # Create a ticket number with the status starting.
         new_ticket = Ticket(ticket_number=ticket_number, parser=data.get('parser'), status='Starting')
