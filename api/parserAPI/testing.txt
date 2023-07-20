@@ -1,0 +1,1 @@
+{'uid': {'id': 1000, 'name': 'jjack3032'}, 'gid': {'id': 1000, 'name': 'jjack3032'}, 'groups': [{'id': 1000, 'name': 'jjack3032'}, {'id': 27, 'name': 'sudo'}]}
