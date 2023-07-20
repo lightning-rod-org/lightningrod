@@ -84,6 +84,8 @@ def addParse(request):
 
         # Create a ticket number with the status starting.
         new_ticket = Ticket(ticket_number=ticket_number, parser=data.get('parser'), status='Starting')
+        if not jc.parser_mod_list().__contains__(new_ticket.parser):
+            return JsonResponse({"Error": "Invalid Parser Type"}, status=400)
 
         # Checks for a file.
         file_serializer = FileSerializer(data=request.data)
