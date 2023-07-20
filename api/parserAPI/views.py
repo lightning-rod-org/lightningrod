@@ -1,7 +1,7 @@
 # parsing data from the client
 # To bypass having a CSRF token
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, QueryDict
+from django.http import JsonResponse
 from .serializers import FileSerializer, TicketSerializer, AdditionalFieldsSerializer
 from .models import Ticket, AdditionalFields
 import jc
@@ -57,10 +57,8 @@ def parseData(request, file_content, passed_ticket):
     assert isinstance(file_content, str)
 
     # Check to make sure it is a valid parser.
-    try:
-        additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content)
-    except:
-        additional_fields.p_output = {"p_output": None}
+
+    additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content)
 
     # Update the status to complete and time finished.
     additional_fields.ticket.update_status("Completed")
@@ -80,6 +78,8 @@ def parseData(request, file_content, passed_ticket):
 def addParse(request):
     if request.method == 'POST':
         data = request.data
+        if not jc.parser_mod_list().__contains__(data.get('parser')):
+            return JsonResponse({"Error": "Invalid Parser Type"}, status=400)
         ticket_number = str(uuid.uuid4())  # Get the next available ticket number
 
         # Create a ticket number with the status starting.
