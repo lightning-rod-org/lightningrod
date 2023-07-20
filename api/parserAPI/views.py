@@ -3,21 +3,16 @@ from rest_framework.parsers import JSONParser
 # To bypass having a CSRF token
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, QueryDict
-from .serializers import InputSerializer, FileSerializer, TicketSerializer, AdditionalFieldsSerializer
-from .models import parseInput, Ticket, AdditionalFields
+from .serializers import FileSerializer, TicketSerializer, AdditionalFieldsSerializer
+from .models import Ticket, AdditionalFields
 import jc
 from django.utils import timezone
 from rest_framework.decorators import api_view
-import os
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from django.utils.dateformat import format
-import json
-import threading, time
-from threading import Event
-
+import threading
 
 @csrf_exempt
-@api_view(['Get'])
+@api_view(['GET'])
 def instantParse(request):
     if request.method == 'GET':
         number = request.GET.get('ticket_number')  # Assuming the ticket number is passed as a query parameter

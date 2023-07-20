@@ -112,13 +112,13 @@ TIME_ZONE = "America/New_York"
 
 DATE_FORMAT = "Y-m-d"
 
-TIME_INPUT_FORMATS = ('%I:%M %p A')
+TIME_INPUT_FORMATS = ('%I:%M %p')
 
 USE_L10N = False
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
