@@ -1,5 +1,4 @@
 # parsing data from the client
-from rest_framework.parsers import JSONParser
 # To bypass having a CSRF token
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, QueryDict
@@ -10,6 +9,8 @@ from django.utils import timezone
 from rest_framework.decorators import api_view
 from django.core.files.uploadedfile import TemporaryUploadedFile
 import threading
+import uuid
+
 
 @csrf_exempt
 @api_view(['GET'])
@@ -27,7 +28,7 @@ def instantParse(request):
             }
 
             # If status complete, update with the rest of the fields.
-            if (ticket.status == "Completed"):
+            if ticket.status == "Completed":
                 additional_fields = AdditionalFields.objects.get(ticket=ticket)
                 response_data.update({
                     'client_ip': additional_fields.client_ip,
@@ -45,39 +46,41 @@ def instantParse(request):
         except (Ticket.DoesNotExist, AdditionalFields.DoesNotExist):
             return JsonResponse({'error': 'Ticket not found'}, status=404)
 
-#Helper function to parse the data for extra fields.
+
+# Helper function to parse the data for extra fields.
 def parseData(request, file_content, passed_ticket):
     additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(),
-                                                                time_finished=timezone.now())
+                                         time_finished=timezone.now())
     additional_fields.client_ip = request.META.get("REMOTE_ADDR")
     additional_fields.ticket.update_status("In Progress")
-    
+
     assert isinstance(file_content, str)
-    
+
     # Check to make sure it is a valid parser.
     try:
         additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content)
     except:
         additional_fields.p_output = {"p_output": None}
-    
-    # Update the status to compelte and time finished.
+
+    # Update the status to complete and time finished.
     additional_fields.ticket.update_status("Completed")
     additional_fields.time_finished = timezone.now()
 
     # Saves the additional fields.
     serializer = AdditionalFieldsSerializer(data=additional_fields.__dict__)
-    if (serializer.is_valid()):
+    if serializer.is_valid():
         print("Data saved!")
         additional_fields.save()
     else:
         print("Not valid!")
+
 
 @csrf_exempt
 @api_view(['POST'])
 def addParse(request):
     if request.method == 'POST':
         data = request.data
-        ticket_number = Ticket.objects.count() + 1  # Get the next available ticket number
+        ticket_number = str(uuid.uuid4())  # Get the next available ticket number
 
         # Create a ticket number with the status starting.
         new_ticket = Ticket(ticket_number=ticket_number, parser=data.get('parser'), status='Starting')
@@ -89,13 +92,13 @@ def addParse(request):
             file_content = file_obj.read().decode('utf-8')
         else:
             return JsonResponse(file_serializer.errors, status=400)
-        
+
         # Checks to make sure it is a valid ticket.
         ticket_serializer = TicketSerializer(data=new_ticket.__dict__)
         if ticket_serializer.is_valid():
             ticket_serializer.save()
 
-            #Create a new thread for each request.
+            # Create a new thread for each request.
             thread = threading.Thread(target=parseData, args=(request, file_content, new_ticket), daemon=True)
             thread.start()
 
