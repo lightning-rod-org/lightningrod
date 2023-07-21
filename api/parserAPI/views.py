@@ -2,8 +2,8 @@
 # To bypass having a CSRF token
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from .serializers import FileSerializer, TicketSerializer, AdditionalFieldsSerializer
-from .models import Ticket, AdditionalFields
+from .serializers import FileSerializer, TicketSerializer , FinalTicketSerializer
+from .models import Ticket, FinalTicket
 import jc
 from django.utils import timezone
 from rest_framework.decorators import api_view
@@ -29,12 +29,12 @@ def instantParse(request):
 
             # If status complete, update with the rest of the fields.
             if ticket.status == "Completed":
-                additional_fields = AdditionalFields.objects.get(ticket=ticket)
+                final_tick = FinalTicket.objects.get(ticket=ticket)
                 response_data.update({
-                    'client_ip': additional_fields.client_ip,
-                    'time_created': additional_fields.time_created,
-                    'time_finished': additional_fields.time_finished,
-                    'p_output': additional_fields.p_output
+                    'client_ip': final_tick.client_ip,
+                    'time_created': final_tick.time_created,
+                    'time_finished': final_tick.time_finished,
+                    'p_output': final_tick.p_output
                 })
                 return JsonResponse(response_data, status=200)
             else:
@@ -43,34 +43,53 @@ def instantParse(request):
                 })
                 return JsonResponse(response_data, status=200)
         # Error in finding ticket number.
-        except (Ticket.DoesNotExist, AdditionalFields.DoesNotExist):
+        except (Ticket.DoesNotExist, final_tick.DoesNotExist):
             return JsonResponse({'error': 'Ticket not found'}, status=404)
-
 
 # Helper function to parse the data for extra fields.
 def parseData(request, file_content, passed_ticket):
-    additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(),
+    final_tick = FinalTicket(ticket=passed_ticket, time_created=timezone.now(),
                                          time_finished=timezone.now())
-    additional_fields.client_ip = request.META.get("REMOTE_ADDR")
-    additional_fields.ticket.update_status("In Progress")
-
+    final_tick.client_ip = request.META.get("REMOTE_ADDR")
+    final_tick.ticket.update_status("In Progress")
+    final_tick.parser = final_tick.ticket.parser
     assert isinstance(file_content, str)
 
     # Check to make sure it is a valid parser.
 
-    additional_fields.p_output = jc.parse(additional_fields.ticket.parser, file_content)
+    final_tick.p_output = jc.parse(final_tick.ticket.parser, file_content)
 
     # Update the status to complete and time finished.
-    additional_fields.ticket.update_status("Completed")
-    additional_fields.time_finished = timezone.now()
+    final_tick.ticket.update_status("Completed")
+    final_tick.time_finished = timezone.now()
 
+    #final_tick = FinalTicket(ticket_number = passed_ticket.ticket_number, parser = passed_ticket.parser, client_ip = FinalTicket.client_ip, time_created = FinalTicket.time_created, time_finished = FinalTicket.time_finished, p_output = FinalTicket.p_output  )
+#     final_tick = FinalTicket(
+#     first_ticket=passed_ticket,
+#     client_ip=FinalTicket.client_ip,
+#     time_created=FinalTicket.time_created,
+#     time_finished=FinalTicket.time_finished,
+#     p_output=FinalTicket.p_output
+# )
+
+    
     # Saves the additional fields.
-    serializer = AdditionalFieldsSerializer(data=additional_fields.__dict__)
+    serializer = FinalTicketSerializer(data=final_tick.__dict__)
+    # serializer2 = FinalTicketSerializer(data=final_tick.__dict__)
+    # if serializer2.is_valid():
+    #     print("got it")
+    #     final_tick.save()
+    # else:
+    #     print("wrong")
+    #     print(serializer2.errors)
+ 
     if serializer.is_valid():
         print("Data saved!")
-        additional_fields.save()
+        FinalTicket.save()
     else:
         print("Not valid!")
+        print(serializer.errors)
+
 
 
 @csrf_exempt
@@ -80,10 +99,10 @@ def addParse(request):
         data = request.data
         if not jc.parser_mod_list().__contains__(data.get('parser')):
             return JsonResponse({"Error": "Invalid Parser Type"}, status=400)
-        ticket_number = str(uuid.uuid4())  # Get the next available ticket number
+        ticket_number = uuid.uuid4()  # Get the next available ticket number
 
         # Create a ticket number with the status starting.
-        new_ticket = Ticket(ticket_number=ticket_number, parser=data.get('parser'), status='Starting')
+        new_ticket = Ticket(ticket_number=str(ticket_number), parser=data.get('parser'), status='Starting')
 
         # Checks for a file.
         file_serializer = FileSerializer(data=request.data)
