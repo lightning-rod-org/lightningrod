@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,7 +39,7 @@ INSTALLED_APPS = [
 
     'parserAPI',
     'rest_framework',
-    'ipware'
+    'ipware',
 ]
 
 MIDDLEWARE = [
@@ -109,11 +108,17 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "America/New_York"
+
+DATE_FORMAT = "Y-m-d"
+
+TIME_INPUT_FORMATS = ('%I:%M %p')
+
+USE_L10N = False
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
