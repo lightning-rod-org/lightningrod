@@ -1,6 +1,7 @@
 services:
-  lightningrod:
+  parser:
     build: .
+    container_name: LightningRod
     ports:
       - "8000:8000"
     command: python api/manage.py runserver 0.0.0.0:8000
