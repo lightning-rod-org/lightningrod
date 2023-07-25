@@ -50,6 +50,7 @@ def instantParse(request):
 def parseData(request, file_content, passed_ticket):
     final_tick = FinalTicket(ticket=passed_ticket, time_created=timezone.now(),
                                          time_finished=timezone.now())
+    final_tick.ticket = passed_ticket
     final_tick.client_ip = request.META.get("REMOTE_ADDR")
     final_tick.ticket.update_status("In Progress")
     final_tick.parser = final_tick.ticket.parser
