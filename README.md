@@ -8,9 +8,14 @@ Output is in JSON-formatted.
 
 LightningRod currently supports a local dev version of the service with `docker`. Begin by cloning this repository.
 
-Run `docker compose up`.
+Run `docker compose up -d`.
+
+If migrations are needed, run:
+`docker compose run parser python api/manage.py migrate`
 
 The service will be accessible at http://localhost:8000/api/
+
+To stop, `docker compose down`
 
 ## Endpoints
 
