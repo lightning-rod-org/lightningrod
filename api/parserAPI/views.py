@@ -31,7 +31,6 @@ def instantParse(request):
             if ticket.status == "Completed":
                 additional_fields = AdditionalFields.objects.get(ticket=ticket)
                 response_data.update({
-                    'client_ip': additional_fields.client_ip,
                     'time_created': additional_fields.time_created,
                     'time_finished': additional_fields.time_finished,
                     'p_output': additional_fields.p_output
@@ -51,7 +50,6 @@ def instantParse(request):
 def parseData(file_content, passed_ticket):
     additional_fields = AdditionalFields(ticket=passed_ticket, time_created=timezone.now(),
                                          time_finished=timezone.now())
-    additional_fields.client_ip = "PLACEHOLDER IP"
     additional_fields.ticket.update_status("In Progress")
 
     assert isinstance(file_content, str)

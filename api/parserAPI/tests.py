@@ -132,7 +132,6 @@ class Test(TestCase):
         self.assertIn('ticket_number', get_response.json())
         self.assertIn('status', get_response.json())
         self.assertIn('parser', get_response.json())
-        self.assertIn('client_ip', get_response.json())
         self.assertIn('time_created', get_response.json())
         self.assertIn('time_finished', get_response.json())
         self.assertIn('p_output', get_response.json())
