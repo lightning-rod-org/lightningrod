@@ -8,6 +8,7 @@ class Test(APITestCase):
         # Create an API client object, and gets URL of post view.
         self.client = APIClient()
         self.post_url = reverse("parserAPI:addParse")
+        self.parsers_url = reverse("parserAPI:getParsers")
     
     # Tests a successful post request.
     def test_addParse_success(self):
@@ -82,3 +83,10 @@ class Test(APITestCase):
 
         response = self.client.post(self.post_url, data=data, format="multipart")
         self.assertEqual(response.status_code, 400)
+    
+    def test_getParsers(self):
+        data = b'{"parsers": ["acpi", "airport", "airport_s", "arp", "asciitable", "asciitable_m", "blkid", "bluetoothctl", "cbt", "cef", "certbot", "chage", "cksum", "clf", "crontab", "crontab_u", "csv", "date", "datetime_iso", "df", "dig", "dir", "dmidecode", "dpkg_l", "du", "email_address", "env", "file", "findmnt", "finger", "free", "fstab", "git_log", "git_ls_remote", "gpg", "group", "gshadow", "hash", "hashsum", "hciconfig", "history", "hosts", "id", "ifconfig", "ini", "ini_dup", "iostat", "ip_address", "iptables", "iw_scan", "iwconfig", "jar_manifest", "jobs", "jwt", "kv", "last", "ls", "lsblk", "lsmod", "lsof", "lspci", "lsusb", "m3u", "mdadm", "mount", "mpstat", "netstat", "nmcli", "ntpq", "openvpn", "os_prober", "passwd", "pci_ids", "pgpass", "pidstat", "ping", "pip_list", "pip_show", "plist", "postconf", "proc", "ps", "route", "rpm_qi", "rsync", "semver", "sfdisk", "shadow", "ss", "ssh_conf", "sshd_conf", "stat", "sysctl", "syslog", "syslog_bsd", "systemctl", "systemctl_lj", "systemctl_ls", "systemctl_luf", "systeminfo", "time", "timedatectl", "timestamp", "toml", "top", "tracepath", "traceroute", "udevadm", "ufw", "ufw_appinfo", "uname", "update_alt_gs", "update_alt_q", "upower", "uptime", "url", "ver", "vmstat", "w", "wc", "who", "x509_cert", "xml", "xrandr", "yaml", "zipinfo", "zpool_iostat", "zpool_status"]}'
+        response = self.client.get(self.parsers_url)
+        self.assertEqual(response.content, data)
+        self.assertEqual(response.status_code, 200)
+

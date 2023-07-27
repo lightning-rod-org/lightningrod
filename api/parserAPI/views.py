@@ -105,3 +105,9 @@ def addParse(request):
             return JsonResponse(ticket_serializer.data, status=201)
         else:
             return JsonResponse(ticket_serializer.errors, status=400)
+
+@csrf_exempt
+@api_view(['GET'])
+def getParsers(request):
+    if request.method == 'GET':
+        return JsonResponse({ "parsers": jc.standard_parser_mod_list()}, status=200)
