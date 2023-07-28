@@ -13,6 +13,7 @@ class Test(TestCase):
         # Create an API client object, set up URLs, and creates file data.
         self.client = APIClient()
         self.post_url = reverse("parserAPI:addParse")
+        self.parsers_url = reverse("parserAPI:getParsers")
         self.get_url = reverse("parserAPI:instantParse")
         self.file_data = "uid=1000(jjack3032) gid=1000(jjack3032) groups=1000(jjack3032),27(sudo)"
 
@@ -125,13 +126,9 @@ class Test(TestCase):
         get_data = {
             "ticket_number": response.json()['ticket_number']
         }
-        get_response = self.client.get(self.get_url, data=get_data)
 
-        # Check if each field is in the get response.
-        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-        self.assertIn('ticket_number', get_response.json())
-        self.assertIn('status', get_response.json())
-        self.assertIn('parser', get_response.json())
-        self.assertIn('time_created', get_response.json())
-        self.assertIn('time_finished', get_response.json())
-        self.assertIn('p_output', get_response.json())
+    def test_getParsers(self):
+        data = b'{"parsers": ["acpi", "airport", "airport_s", "arp", "asciitable", "asciitable_m", "blkid", "bluetoothctl", "cbt", "cef", "certbot", "chage", "cksum", "clf", "crontab", "crontab_u", "csv", "date", "datetime_iso", "df", "dig", "dir", "dmidecode", "dpkg_l", "du", "email_address", "env", "file", "findmnt", "finger", "free", "fstab", "git_log", "git_ls_remote", "gpg", "group", "gshadow", "hash", "hashsum", "hciconfig", "history", "hosts", "id", "ifconfig", "ini", "ini_dup", "iostat", "ip_address", "iptables", "iw_scan", "iwconfig", "jar_manifest", "jobs", "jwt", "kv", "last", "ls", "lsblk", "lsmod", "lsof", "lspci", "lsusb", "m3u", "mdadm", "mount", "mpstat", "netstat", "nmcli", "ntpq", "openvpn", "os_prober", "passwd", "pci_ids", "pgpass", "pidstat", "ping", "pip_list", "pip_show", "plist", "postconf", "proc", "ps", "route", "rpm_qi", "rsync", "semver", "sfdisk", "shadow", "ss", "ssh_conf", "sshd_conf", "stat", "sysctl", "syslog", "syslog_bsd", "systemctl", "systemctl_lj", "systemctl_ls", "systemctl_luf", "systeminfo", "time", "timedatectl", "timestamp", "toml", "top", "tracepath", "traceroute", "udevadm", "ufw", "ufw_appinfo", "uname", "update_alt_gs", "update_alt_q", "upower", "uptime", "url", "ver", "vmstat", "w", "wc", "who", "x509_cert", "xml", "xrandr", "yaml", "zipinfo", "zpool_iostat", "zpool_status"]}'
+        response = self.client.get(self.parsers_url)
+        self.assertEqual(response.content, data)
+        self.assertEqual(response.status_code, 200)

@@ -99,3 +99,9 @@ def addParse(request):
             thread.start()
 
             return JsonResponse(ticket_serializer.data, status=201)
+
+@csrf_exempt
+@api_view(['GET'])
+def getParsers(request):
+    if request.method == 'GET':
+        return JsonResponse({ "parsers": jc.standard_parser_mod_list()}, status=200)
