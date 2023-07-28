@@ -12,7 +12,8 @@ Run `docker compose up -d`.
 
 If an error occurs with the following message:
 ```
-permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/containers/json?all=1&filters=%7B%22label%22%3A%7B%22com.docker.compose.config-hash%22%3Atrue%2C%22com.docker.compose.project%3Dlightningrod%22%3Atrue%7D%7D": dial unix /var/run/docker.sock: connect: permission denied ```
+permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/containers/json?all=1&filters=%7B%22label%22%3A%7B%22com.docker.compose.config-hash%22%3Atrue%2C%22com.docker.compose.project%3Dlightningrod%22%3Atrue%7D%7D": dial unix /var/run/docker.sock: connect: permission denied 
+```
 Then, follow these steps under **Manage Docker as a non-root user** at https://docs.docker.com/engine/install/linux-postinstall/.
 
 If migrations are needed, run:
