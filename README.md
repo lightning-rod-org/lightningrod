@@ -6,13 +6,16 @@ Output is formatted in JSON.
 
 ## Install and Run
 
-LightningRod currently supports a local dev version of the service. Begin by cloning this repository.
+LightningRod currently supports a local dev version of the service with `docker`. Begin by cloning this repository.
 
-`python3` prerequisite packages: `Djano`, `httpx`, and `django-ipware`
+Run `docker compose up -d`.
 
-Run by using `python3 api/manage.py runserver`
+If migrations are needed, run:
+`docker compose run parser python api/manage.py migrate`
 
 The service will be accessible at http://localhost:8000/api/
+
+To stop, `docker compose down`
 
 ## Endpoints
 
