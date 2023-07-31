@@ -1,18 +1,31 @@
 <template>
-  <div id="nav">
-    <Main></Main>
+  <div> 
+    <div>
+      <Navbar></Navbar>
+  </div>
+  <div class="row">
+    <div class="col-2 side-col">    
+      <Sidebar></Sidebar>
+    </div>
+    <div class="col-10"> 
+    <Home></Home>
+    </div>
+    </div>
   </div>
 </template>
 <script>
-import Main from './components/Main.vue'
+import Home from './components/Home.vue'
+import Navbar from './components/Navbar.vue'
+import Sidebar from './components/Sidebar.vue'
 export default {
   name: 'App',
   props: {
 
   },
   components: {
-    Main
-
+    Home,
+    Navbar,
+    Sidebar
   }
 }
 </script>
@@ -38,4 +51,9 @@ export default {
 #nav a.router-link-exact-active {
   color: #42b983;
 }
+.side-col{
+/* padding-right: 200; */
+padding-left: 0;
+height: 100vh}
+
 </style>
