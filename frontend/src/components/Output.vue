@@ -7,7 +7,7 @@
                 <h3 class="text-start text-primary">Output</h3> 
               </div>
                 <div class="col-12"> 
-                  <textarea v-model="jsonstr" rows="20" cols="130"></textarea>
+                  <textarea v-model="jsonstr" class="form-control bg-light" id="exampleFormControlTextarea1" rows="3"></textarea>
             </div>
             </div>
           </div>
