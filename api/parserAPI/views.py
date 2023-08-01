@@ -68,7 +68,7 @@ def parseData(request, file_content, passed_ticket):
     serializer = AdditionalFieldsSerializer(data=additional_fields.__dict__)
     if serializer.is_valid():
         print("Data saved!")
-        additional_fields.save()
+        # additional_fields.save()
     else:
         print("Not valid!")
 

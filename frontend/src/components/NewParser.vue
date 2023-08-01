@@ -1,8 +1,7 @@
 <template>
     <div>
         <div class="row w-100 justify-content-left"> 
-
-      <div class="card shadow-lg rounded">
+           <div class="card shadow-sm rounded">
             <div class="card-body mb-2">
                 <div class="col-9"> 
                 <h3 class="text-start p-1 text-primary">Add Parsers</h3>

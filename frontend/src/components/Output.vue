@@ -1,15 +1,13 @@
 <template>
     <div>
         <div class="row w-100 justify-content-left"> 
-
-      <div class="card shadow-lg rounded">
-            <div class="card-body p-4">
-                <div> 
-                <h3 class="text-start p-1 text-primary">Output</h3>
-                
-            </div>
-                <div class="p-3"> 
-                <button type="button" class="btn btn-outline-primary">Go</button>
+          <div class="card shadow-sm rounded">
+            <div class="card-body mb-2 p-4">
+                <div class=""> 
+                <h3 class="text-start text-primary">Output</h3> 
+              </div>
+                <div class="col-12"> 
+                  <textarea v-model="jsonstr" rows="20" cols="130"></textarea>
             </div>
             </div>
           </div>
@@ -19,6 +17,11 @@
    <script>
    export default {
      name: 'Output',
+     data(){
+      return {
+        jsonstr: '{"id":1,"name":"A green door","price":12.50,"tags":["home","green"]}'
+      }
+     },
      props: {
      },
      methods: {}

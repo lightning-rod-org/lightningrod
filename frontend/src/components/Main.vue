@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="row w-100 justify-content-left"> 
-      <div class="card shadow-lg rounded">
+      <div class="card shadow-sm rounded">
         <div class="card-body mb-2">
           <h3 class="text-start text-primary">Parse File</h3>
           <div class="col-9">
@@ -34,27 +34,27 @@ export default {
     return {
       file: null,
       content: null,
-      formData: null
+      formData: null,
+      parser: 'ifconfig'
     }
   },
   methods: {
       previewFiles(event) {
       console.log(event.target.files);
-      this.file =  event.target.files;
-      this.formData = new FormData();
-      this.formData.append('file', this.file); // Append the file to the form data
-      this.formData.append('parser', 'ifconfig'); // Append your parser value
-
+      this.file =  event.target.files[0];
+      console.log(this.file)
+            // formData = new FormData();
+      // formData.append('file', this.file); // Append the file to the form data
+      // formData.append('parser', 'ifconfig'); // Append your parser value
+      // console.log(JSON.stringify(formData))
    },
   
-    uploadFile() {
-      console.log(this.formData)
-      axios({
-          method: "post",
-          url: "http://localhost:8000/api/submit/",
-          data: this.formData,
-          headers: { "Content-Type": "multipart/form-data" },
-        })
+    async uploadFile() {
+      var formData = new FormData()
+      formData.append('file', this.file)
+      formData.append('parser', "ifconfig")
+      const headers = { 'Content-Type': 'application/json, text/plain, */*' }
+      axios.post("http://localhost:8000/api/submit/", formData, headers)
           .then(function (response) {
             //handle success
             console.log(response);
@@ -63,8 +63,6 @@ export default {
             //handle error
             console.log(response);
           });
-
-
     },
 }}
 </script>
