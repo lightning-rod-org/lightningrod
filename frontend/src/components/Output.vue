@@ -4,7 +4,14 @@
           <div class="card shadow-sm rounded">
             <div class="card-body mb-2 p-4">
                 <div class=""> 
+                  <div class="row"> 
+                    <div class="col-2"> 
                 <h3 class="text-start text-primary">Output</h3> 
+              </div>
+              <div class="col-2"> 
+                <button class="btn mb-5 btn-light" @click="getOut()">Request JSON</button>
+              </div>
+              </div>
               </div>
                 <div class="col-12"> 
                   <textarea v-model="$store.state.currentOutput" class="form-control bg-light" id="exampleFormControlTextarea1" rows="15"></textarea>
@@ -15,7 +22,11 @@
     </div>
   </template>
    <script>
-   export default {
+
+import store from '@/store/index.js';
+
+  export default {
+
      name: 'Output',
      data(){
       return {
@@ -24,7 +35,13 @@
      },
      props: {
      },
-     methods: {},
+     methods: {
+      async getOut(){
+        store.commit('setOutput', {})
+
+      }
+
+     },
      watch: {
         
 

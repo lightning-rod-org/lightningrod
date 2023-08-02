@@ -14,7 +14,7 @@ class Ticket(models.Model):
 
 class AdditionalFields(models.Model):
     ticket = models.OneToOneField(Ticket, on_delete=models.CASCADE, related_name='additional_fields')
-    client_ip = models.CharField(max_length=100)
+    # client_ip = models.CharField(max_length=100)
     time_created = models.DateTimeField()
     time_finished = models.DateTimeField()
     p_output = models.JSONField()

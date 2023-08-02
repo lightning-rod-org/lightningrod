@@ -9,7 +9,7 @@ class FileSerializer(serializers.ModelSerializer):
 class AdditionalFieldsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdditionalFields
-        fields = ['client_ip', 'time_created', 'time_finished', 'p_output']
+        fields = ['time_created', 'time_finished', 'p_output']
 
 class TicketSerializer(serializers.ModelSerializer):
 

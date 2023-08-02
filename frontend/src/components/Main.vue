@@ -28,6 +28,7 @@
 <script>
 import axios from 'axios';
 import store from '@/store/index.js';
+import { useToast } from "vue-toastification";
 
 export default {
   name: 'Main',
@@ -37,6 +38,7 @@ export default {
       content: null,
       formData: null,
       parser: 'ifconfig'
+      
     }
   },
   methods: {
@@ -53,23 +55,29 @@ export default {
    },
   
     async uploadFile() {
+      const toast = useToast();
       var formData = new FormData()
       formData.append('file', this.file)
       formData.append('parser', "ifconfig")
       const headers = { 'Content-Type': 'application/json, text/plain, */*' }
+      let x = ""
+      store.commit('setCurrentTicket', {ticket: x });
       axios.post("http://localhost:8000/api/submit/", formData, headers)
           .then(function (response) {
             //handle success
             console.log(response.data.ticket_number);
             // var x = response;
-            var x = response.data.ticket_number;
+            x = response.data.ticket_number;
             store.commit('setCurrentTicket', {ticket: x });
+            toast.success("Request received", {
+            timeout: 2000
+      });
 
           })
           .catch(function (response) {
             //handle error
             console.log(response);
-          });
-    },
+          });  
+        },
 }}
 </script>
