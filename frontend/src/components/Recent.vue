@@ -7,11 +7,11 @@
                     <div>
                         <h3 class="text-start p-1 text-primary">Recent Calls</h3>
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item">WIP</li>
-                            <li class="list-group-item">WIP</li>
-                            <li class="list-group-item">WIP</li>
-                            <li class="list-group-item">WIP</li>
-                            <li class="list-group-item">WIP</li>
+                            <li class="list-group-item">N/A</li>
+                            <li class="list-group-item">N/A</li>
+                            <li class="list-group-item">N/A</li>
+                            <li class="list-group-item">N/A</li>
+                            <li class="list-group-item">N/A</li>
                         </ul>
 
                     </div>
