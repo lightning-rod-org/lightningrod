@@ -7,7 +7,7 @@
                 <h3 class="text-start text-primary">Output</h3> 
               </div>
                 <div class="col-12"> 
-                  <textarea v-model="jsonstr" class="form-control bg-light" id="exampleFormControlTextarea1" rows="3"></textarea>
+                  <textarea v-model="$store.state.currentOutput" class="form-control bg-light" id="exampleFormControlTextarea1" rows="15"></textarea>
             </div>
             </div>
           </div>
@@ -19,11 +19,15 @@
      name: 'Output',
      data(){
       return {
-        jsonstr: '{"id":1,"name":"A green door","price":12.50,"tags":["home","green"]}'
+        // jsonstr: '{"id":1,"name":"A green door","price":12.50,"tags":["home","green"]}'
       }
      },
      props: {
      },
-     methods: {}
-   }
+     methods: {},
+     watch: {
+        
+
+  },
+}
    </script>

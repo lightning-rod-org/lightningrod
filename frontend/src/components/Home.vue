@@ -47,7 +47,7 @@ components: {
     NewParser,
     Recent,
     Output
-}
+  }
 }
 </script>
 <style scoped>

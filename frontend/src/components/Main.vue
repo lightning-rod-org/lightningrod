@@ -27,6 +27,7 @@
 
 <script>
 import axios from 'axios';
+import store from '@/store/index.js';
 
 export default {
   name: 'Main',
@@ -43,6 +44,8 @@ export default {
       console.log(event.target.files);
       this.file =  event.target.files[0];
       console.log(this.file)
+      // this.$store.commit('setCurrentTicket', {  });
+
             // formData = new FormData();
       // formData.append('file', this.file); // Append the file to the form data
       // formData.append('parser', 'ifconfig'); // Append your parser value
@@ -57,7 +60,11 @@ export default {
       axios.post("http://localhost:8000/api/submit/", formData, headers)
           .then(function (response) {
             //handle success
-            console.log(response);
+            console.log(response.data.ticket_number);
+            // var x = response;
+            var x = response.data.ticket_number;
+            store.commit('setCurrentTicket', {ticket: x });
+
           })
           .catch(function (response) {
             //handle error
