@@ -1,5 +1,5 @@
 <template>
-    <nav class="navbar navbar-light shadow-sm">
+    <nav class="navbar navbar-dark bg-dark shadow-sm">
   <div class="container-fluid mb-2 mt-2">
         <span class="navbar-brand mb-0 h1">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lightning-fill" viewBox="0 0 16 16">

@@ -7,12 +7,12 @@
             <div class="mt-3 w-100">
               <!-- <h1 class="d-flex justify-content-start">Dashboard</h1> -->
               <!-- <h1 class="text-left">Dashboard</h1> -->
-              <Main></Main>
+              <NewParser></NewParser>
             </div>
           </div>
           <div class="col-4">
             <div class="mt-3 w-100">
-              <NewParser></NewParser>
+              <Main></Main>
             </div>
           </div>
           <div class="col-3">

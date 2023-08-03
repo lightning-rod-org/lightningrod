@@ -14,6 +14,9 @@
               </div>
               </div>
                 <div class="col-12"> 
+                  <div v-if="$store.state.spinner" class="spinner-border spin text-primary" role="status">
+                  <span class="sr-only"></span>
+                </div>
                   <textarea v-model="$store.state.currentOutput" class="form-control bg-light" id="exampleFormControlTextarea1" rows="15"></textarea>
             </div>
             </div>
@@ -48,3 +51,9 @@ import store from '@/store/index.js';
   },
 }
    </script>
+
+<style scoped>
+.spin{
+  position:fixed;
+}
+</style>
