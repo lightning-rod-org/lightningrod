@@ -5,7 +5,7 @@ app_name = 'parserAPI'
 
 # define the urls
 urlpatterns = [
-    path('instantParse/', views.instantParse, name='instantParse'),
+    path('status/', views.instantParse, name='status'),
     path('submit/', views.addParse, name='addParse'),
     path('parsers/', views.getParsers, name='getParsers')
 ]
