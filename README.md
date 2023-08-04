@@ -10,12 +10,26 @@ LightningRod currently supports a local dev version of the service with `docker`
 
 Run `docker compose up -d`.
 
+If an error occurs with the following message:
+```
+permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Frun%2Fdocker.sock/v1.24/containers/json?all=1&filters=%7B%22label%22%3A%7B%22com.docker.compose.config-hash%22%3Atrue%2C%22com.docker.compose.project%3Dlightningrod%22%3Atrue%7D%7D": dial unix /var/run/docker.sock: connect: permission denied 
+```
+Then, follow these steps under **Manage Docker as a non-root user** at https://docs.docker.com/engine/install/linux-postinstall/.
+
 If migrations are needed, run:
 `docker compose run parser python api/manage.py migrate`
 
 The service will be accessible at http://localhost:8000/api/
 
 To stop, `docker compose down`
+
+## Testing
+
+LightningRod has unit tests in the tests.py file and currently tests the functions in views.py.
+
+To run tests, use the command `coverage run --source='.' manage.py test parserAPI`
+
+To see the result and coverage, use `coverage report`
 
 ## Endpoints
 
@@ -72,6 +86,7 @@ Returns a list of parsers that are currently supported under a `parsers` JSON ke
     "email_address",
     "env",
     "file",
+    "find",
     "findmnt",
     "finger",
     "free",
@@ -101,6 +116,7 @@ Returns a list of parsers that are currently supported under a `parsers` JSON ke
     "kv",
     "last",
     "ls",
+    "lsattr",
     "lsblk",
     "lsmod",
     "lsof",
@@ -132,6 +148,7 @@ Returns a list of parsers that are currently supported under a `parsers` JSON ke
     "semver",
     "sfdisk",
     "shadow",
+    "srt",
     "ss",
     "ssh_conf",
     "sshd_conf",
@@ -161,11 +178,13 @@ Returns a list of parsers that are currently supported under a `parsers` JSON ke
     "uptime",
     "url",
     "ver",
+    "veracrypt",
     "vmstat",
     "w",
     "wc",
     "who",
     "x509_cert",
+    "x509_csr",
     "xml",
     "xrandr",
     "yaml",
