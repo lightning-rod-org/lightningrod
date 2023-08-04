@@ -21,6 +21,16 @@ If migrations are needed, run:
 
 The service will be accessible at http://localhost:8000/api/
 
+Once the service has been started, you can access the post, get, and get parsers command through the following curl commands respectively.
+
+New Parse request, `curl --location 'http://localhost:8000/api/submit/?=' \ --form 'parser="blank"' \ --form 'file=@"/path_to_file/blank.txt"'`
+    Here replace the 'parser=blank', with the name of the parser you wish to use. Then also replace the 'file=@"/path_to_file/blank.txt" path with the absolute path to the file you wish to run the command with.
+
+Get request, `curl --location 'http://localhost:8000/api/status/?ticket_number=00000000-00000000-00000000-00000000'`
+    Here replace the 'ticket_number=00000000-00000000-00000000-00000000', with the ticket provided by any previous post request.
+
+Get parsers, `curl --location 'http://localhost:8000/api/parsers'`
+
 To stop, `docker compose down`
 
 ## Testing
