@@ -67,8 +67,7 @@ Returns a list of parsers that are currently supported under a `parsers` JSON ke
 
 <details>
 <summary>Click to open list of parsers.</summary>
-```
-{
+```{
   "parsers": [
     "acpi",
     "airport",
@@ -204,6 +203,5 @@ Returns a list of parsers that are currently supported under a `parsers` JSON ke
     "zpool_iostat",
     "zpool_status"
   ]
-}
-```
+}```
 </details>
