@@ -207,3 +207,12 @@ Returns a list of parsers that are currently supported under a `parsers` JSON ke
   }
   </code></pre>
 </details>
+
+## Future Development
+
+LightningRod is currently in development and some features that we would like to integrate into the project include but not limited to:
+  * Expansion of UI to support multiple request tickets
+  * CI/CD
+  * Expansion to the list of supported parsers
+  * Integration Testing using the Robot Framework - ensures that LightningRod has full coverage for end-to-end testing
+  * Production containers
