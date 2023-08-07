@@ -1,84 +1,277 @@
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APIClient
+from rest_framework import status
+from django.test import  TestCase
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
+from parserAPI.models import Ticket
+from unittest import mock
+from parserAPI.views import parseData
 
-class Test(APITestCase):
+class Test(TestCase):
 
     def setUp(self):
-        # Create an API client object, and gets URL of post view.
+        # Create an API client object, set up URLs, and creates file data.
         self.client = APIClient()
         self.post_url = reverse("parserAPI:addParse")
-    
-    # Tests a successful post request.
-    def test_addParse_success(self):
-        # Populate the file with this data.
-        file_data = """
-                    docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
-                            inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
-                            ether 02:42:6d:c9:82:46  txqueuelen 0  (Ethernet)
-                            RX packets 0  bytes 0 (0.0 B)
-                            RX errors 0  dropped 0  overruns 0  frame 0
-                            TX packets 0  bytes 0 (0.0 B)
-                            TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+        self.parsers_url = reverse("parserAPI:getParsers")
+        self.get_url = reverse("parserAPI:instantParse")
+        self.file_data = "uid=1000(jjack3032) gid=1000(jjack3032) groups=1000(jjack3032),27(sudo)"
 
-                    enp0s3: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
-                            inet 10.0.2.15  netmask 255.255.255.0  broadcast 10.0.2.255
-                            inet6 fe80::30d4:bdd3:b7d0:3a3e  prefixlen 64  scopeid 0x20<link>
-                            ether 08:00:27:c7:e5:37  txqueuelen 1000  (Ethernet)
-                            RX packets 21390  bytes 24617735 (24.6 MB)
-                            RX errors 0  dropped 0  overruns 0  frame 0
-                            TX packets 7691  bytes 1033944 (1.0 MB)
-                            TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+    # Test for a bad parser input.
+    def test_bad_parser(self):
+        file_obj = SimpleUploadedFile("id_data.txt", self.file_data.encode(), content_type="text/plain")
 
-                    lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
-                            inet 127.0.0.1  netmask 255.0.0.0
-                            inet6 ::1  prefixlen 128  scopeid 0x10<host>
-                            loop  txqueuelen 1000  (Local Loopback)
-                            RX packets 2565  bytes 1164016 (1.1 MB)
-                            RX errors 0  dropped 0  overruns 0  frame 0
-                            TX packets 2565  bytes 1164016 (1.1 MB)
-                            TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
-                    """
-        
-        # Creates a file and encodes it into a text file.
-        file_obj = SimpleUploadedFile("ifconfig_data.txt", file_data.encode(), content_type="text/plain")
-
-        # Populate the request body for file uploads.
         data = {
-            "parser": "ifconfig",
+            "parser": "DNE",
             "file": file_obj,
         }
-
-        # Create a post request that will use the url, data, and the multipart format type for files.
         response = self.client.post(self.post_url, data=data, format="multipart") 
 
-        # Checks if the post request was saved and correct content-type.
-        self.assertEqual(response['Content-Type'], "application/json")
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), {"error": "Invalid Parser Type"})
 
-    # Tests to make sure the file serializer works properly.
-    def test_addParse_bad_file_format(self):
-        file_data = "uid=1000(jjack3032) gid=1000(jjack3032) groups=1000(jjack3032),27(sudo)"
-        file_obj = SimpleUploadedFile("id_data.txt", file_data.encode(), content_type="text/plain")
-
+    # Test for a bad file input.
+    def test_bad_file(self):
         data = {
             "parser": "id",
-            "file": file_obj
+            "file": "DNE",
+        }
+        response = self.client.post(self.post_url, data=data, format="multipart") 
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), {"file": ["The submitted data was not a file. Check the encoding type on the form."]})
+
+    # Test a get request for an invalid ticket number.
+    def test_get_nonexistent_ticket(self):
+        get_data = {
+            "ticket_number": "DNE"
         }
 
-        response = self.client.post(self.post_url, data=data, format="json")
+        response = self.client.get(self.get_url, get_data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json(), {'error': 'Ticket Not Found'})
 
-        self.assertEqual(response.status_code, 400)
-    
-    # Tests to make sure a bad parser produces an error.
-    def test_addParse_bad_parser(self):
-        file_data = "uid=1000(jjack3032) gid=1000(jjack3032) groups=1000(jjack3032),27(sudo)"
-        file_obj = SimpleUploadedFile("id_data.txt", file_data.encode(), content_type="text/plain")
+    # Test a ticket that would still be in progress.
+    @mock.patch('parserAPI.views.threading')
+    def test_get_inprogress_ticket(self, mock_threading):
+        # Create a mock of a thread.
+        mock_thread_instance = mock.Mock()
+        mock_threading.Thread.return_value = mock_thread_instance
 
+        # Creates a file and encodes it into a text file.
+        file_obj = SimpleUploadedFile("id_data.txt", self.file_data.encode(), content_type="text/plain")
+
+        # Make a post request with a body.
         data = {
-            "parser": "notValid",
-            "file": file_obj
+            "parser": "id",
+            "file": file_obj,
         }
+        response = self.client.post(self.post_url, data=data, format="multipart") 
 
-        response = self.client.post(self.post_url, data=data, format="multipart")
-        self.assertEqual(response.status_code, 400)
+        # Check if post request was successful.
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        mock_threading.Thread.assert_called_once()
+        mock_thread_instance.start.assert_called_once()
+        self.assertIn('ticket_number', response.json())
+        self.assertIn('status', response.json())
+        self.assertIn('parser', response.json())
+
+        new_ticket = Ticket.objects.get(ticket_number=response.json()['ticket_number'])
+
+        # Manually make the status In Progress.
+        new_ticket.update_status("In Progress")
+
+        # Create get request with a body.
+        get_data = {
+            "ticket_number": response.json()['ticket_number']
+        }
+        get_response = self.client.get(self.get_url, data=get_data)
+
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertIn('ticket_number', response.json())
+        self.assertIn('status', response.json())
+        self.assertIn('parser', response.json())
+
+    # Tests a successful post and get request.
+    @mock.patch('parserAPI.views.threading')
+    def test_successful_post_and_get(self, mock_threading):
+
+        # Create a mock of the thread.
+        mock_thread_instance = mock.Mock()
+        mock_threading.Thread.return_value = mock_thread_instance
+
+        # Creates a file and encodes it into a text file.
+        file_obj = SimpleUploadedFile("id_data.txt", self.file_data.encode(), content_type="text/plain")
+
+        # Make a post request with a body.
+        data = {
+            "parser": "id",
+            "file": file_obj,
+        }
+        response = self.client.post(self.post_url, data=data, format="multipart") 
+
+        # Check if the post request was saved with the correct fields.
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        mock_threading.Thread.assert_called_once()
+        mock_thread_instance.start.assert_called_once()
+        self.assertIn('ticket_number', response.json())
+        self.assertIn('status', response.json())
+        self.assertIn('parser', response.json())
+
+        # Get the ticket and add additional fields.
+        new_ticket = Ticket.objects.get(ticket_number=response.json()['ticket_number'])
+        parseData(self.file_data, new_ticket)
+
+        # Make a get request
+        get_data = {
+            "ticket_number": response.json()['ticket_number']
+        }
+        get_response = self.client.get(self.get_url, data=get_data)
+
+        # Check if each field is in the get response.
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertIn('ticket_number', get_response.json())
+        self.assertIn('status', get_response.json())
+        self.assertIn('parser', get_response.json())
+        self.assertIn('time_created', get_response.json())
+        self.assertIn('time_finished', get_response.json())
+        self.assertIn('p_output', get_response.json())
+
+    def test_getParsers(self):
+        self.maxDiff = None
+        data = {'parsers': ['acpi',
+               'airport',
+               'airport_s',
+               'arp',
+               'asciitable',
+               'asciitable_m',
+               'blkid',
+               'bluetoothctl',
+               'cbt',
+               'cef',
+               'certbot',
+               'chage',
+               'cksum',
+               'clf',
+               'crontab',
+               'crontab_u',
+               'csv',
+               'date',
+               'datetime_iso',
+               'df',
+               'dig',
+               'dir',
+               'dmidecode',
+               'dpkg_l',
+               'du',
+               'email_address',
+               'env',
+               'file',
+               'find',
+               'findmnt',
+               'finger',
+               'free',
+               'fstab',
+               'git_log',
+               'git_ls_remote',
+               'gpg',
+               'group',
+               'gshadow',
+               'hash',
+               'hashsum',
+               'hciconfig',
+               'history',
+               'hosts',
+               'id',
+               'ifconfig',
+               'ini',
+               'ini_dup',
+               'iostat',
+               'ip_address',
+               'iptables',
+               'iw_scan',
+               'iwconfig',
+               'jar_manifest',
+               'jobs',
+               'jwt',
+               'kv',
+               'last',
+               'ls',
+               'lsattr',
+               'lsblk',
+               'lsmod',
+               'lsof',
+               'lspci',
+               'lsusb',
+               'm3u',
+               'mdadm',
+               'mount',
+               'mpstat',
+               'netstat',
+               'nmcli',
+               'ntpq',
+               'openvpn',
+               'os_prober',
+               'passwd',
+               'pci_ids',
+               'pgpass',
+               'pidstat',
+               'ping',
+               'pip_list',
+               'pip_show',
+               'plist',
+               'postconf',
+               'proc',
+               'ps',
+               'route',
+               'rpm_qi',
+               'rsync',
+               'semver',
+               'sfdisk',
+               'shadow',
+               'srt',
+               'ss',
+               'ssh_conf',
+               'sshd_conf',
+               'stat',
+               'sysctl',
+               'syslog',
+               'syslog_bsd',
+               'systemctl',
+               'systemctl_lj',
+               'systemctl_ls',
+               'systemctl_luf',
+               'systeminfo',
+               'time',
+               'timedatectl',
+               'timestamp',
+               'toml',
+               'top',
+               'tracepath',
+               'traceroute',
+               'udevadm',
+               'ufw',
+               'ufw_appinfo',
+               'uname',
+               'update_alt_gs',
+               'update_alt_q',
+               'upower',
+               'uptime',
+               'url',
+               'ver',
+               'veracrypt',
+               'vmstat',
+               'w',
+               'wc',
+               'who',
+               'x509_cert',
+               'x509_csr',
+               'xml',
+               'xrandr',
+               'yaml',
+               'zipinfo',
+               'zpool_iostat',
+               'zpool_status']}
+        response = self.client.get(self.parsers_url)
+        self.assertEqual(response.json(), data)
+        self.assertEqual(response.status_code, 200)
