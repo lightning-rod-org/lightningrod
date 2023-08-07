@@ -6,7 +6,7 @@ export default createStore({
     currentTicket: "",
     status: false,
     currentOutput: "",
-    currentParser: "",
+    currentParser: "Choose a Parser",
     spinner: false,
   },
   mutations: {

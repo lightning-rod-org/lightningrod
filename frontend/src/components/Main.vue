@@ -32,6 +32,7 @@ import { useToast } from "vue-toastification";
 
 export default {
   name: 'Main',
+  components: {},
   data() {
     return {
       file: null,
