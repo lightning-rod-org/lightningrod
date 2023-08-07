@@ -65,6 +65,8 @@ The output will be reutrned in JSON format in the field `p_output`.
 
 Returns a list of parsers that are currently supported under a `parsers` JSON key.
 
+<details>
+<summary>Click to open list of parsers.</summary>
 ```
 {
   "parsers": [
@@ -204,3 +206,4 @@ Returns a list of parsers that are currently supported under a `parsers` JSON ke
   ]
 }
 ```
+</details>
