@@ -53,7 +53,7 @@ Two required fields in the body of the request are `parser` and `file`.
 
 Save the `ticket_number` number value to request the status.
 
-### GET /submit
+### GET /status
 
 This returns the status of a submitted ticket. This takes one query parameter.
 
