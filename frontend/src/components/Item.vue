@@ -1,13 +1,16 @@
 <template>
     <div>
-        <li class="list-group-item">bruh</li>
-    </div>  
+      <button type="button" class="btn btn-light">{{ticket_name}}</button>
+  </div>  
 </template>
 <script>
   export default {
-    name: 'Recent',
-    props: {
-    },
-    methods: {}
+    name: 'Item',
+    props: ['ticket_name'],
+    methods: {
+      pressed() {
+
+      }
+    }
   }
   </script>

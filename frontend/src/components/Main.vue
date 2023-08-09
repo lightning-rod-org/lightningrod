@@ -2,9 +2,9 @@
   <div>
     <div class="row w-100 justify-content-left"> 
       <div class="card shadow-sm rounded">
-        <div class="card-body mb-2">
+        <div class="card-body mb-1">
           <h3 class="text-start text-primary">Parse File</h3>
-          <div class="col-9">
+          <div class="col-12">
             <div>
               <label for="formFileLg" class="control-label form-label">Choose a File</label>
               <input class="form-control form-control" id="formFileLg" type="file" ref="fileInput" @change="previewFiles">
@@ -58,11 +58,16 @@ export default {
     async uploadFile() {
       const toast = useToast();
       var formData = new FormData()
+      if(store.state.currentParser == "Choose a Parser"){
+        toast.warning("Please select a Parser", {
+        timeout: 2000
+      })}
+      else{
       formData.append('file', this.file)
-      formData.append('parser', "ifconfig")
+      formData.append('parser', store.state.currentParser)
       const headers = { 'Content-Type': 'application/json, text/plain, */*' }
       let x = ""
-      store.commit('setCurrentTicket', {ticket: x });
+      // store.commit('setCurrentTicket', {ticket: x });
       axios.post("http://localhost:8000/api/submit/", formData, headers)
           .then(function (response) {
             //handle success
@@ -79,6 +84,7 @@ export default {
             //handle error
             console.log(response);
           });  
-        },
+        }
+      }
 }}
 </script>

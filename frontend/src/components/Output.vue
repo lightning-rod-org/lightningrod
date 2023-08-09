@@ -11,6 +11,9 @@
               <div class="col-2"> 
                 <button class="btn mb-5 btn-light" @click="getOut()">Request JSON</button>
               </div>
+              <div class="col-8">
+                  <a>Current Ticket: {{ $store.state.currentTicket }}</a>
+                </div>
               </div>
               </div>
                 <div class="col-12"> 
@@ -27,6 +30,7 @@
    <script>
 
 import store from '@/store/index.js';
+import { useToast } from 'vue-toastification'
 
   export default {
 
@@ -40,8 +44,17 @@ import store from '@/store/index.js';
      },
      methods: {
       async getOut(){
-        store.commit('setOutput', {})
+        if(store.state.currentTicket == "Choose a Parser"){
+          const toast = useToast()
 
+          console.log(" ")
+          toast.error("No ticket set");
+
+        }else{
+
+        
+        store.commit('setOutput', {})
+        
       }
 
      },
@@ -49,7 +62,7 @@ import store from '@/store/index.js';
         
 
   },
-}
+}}
    </script>
 
 <style scoped>
