@@ -4,7 +4,7 @@
             <div class="card shadow-sm rounded">
                 <div class="card-body mb-1">
                     <div>
-                        <h3 class="p-2 text-primary">Aditional Info</h3>
+                        <h3 class="p-2 text-primary">Additional Info</h3>
                             <h4 class="">Status:</h4>
                             <a>{{$store.state.additional_info.ticket_status}}</a>
                             <h4>Parser:</h4>
