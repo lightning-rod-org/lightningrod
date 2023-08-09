@@ -208,6 +208,9 @@ Returns a list of parsers that are currently supported under a `parsers` JSON ke
   </code></pre>
 </details>
 
+## Frontend
+In  order to run the frontend, you must have Node and Vue installed. After this, running `npm install` will clear up any other packages that are needed. Finally, in order to run the project, cd into frontend and run `npm run serve`.
+
 ## Future Development
 
 LightningRod is currently in development and some features that we would like to integrate into the project include but not limited to:
