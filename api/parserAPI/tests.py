@@ -14,7 +14,7 @@ class Test(TestCase):
         self.client = APIClient()
         self.post_url = reverse("parserAPI:addParse")
         self.parsers_url = reverse("parserAPI:getParsers")
-        self.get_url = reverse("parserAPI:instantParse")
+        self.get_url = reverse("parserAPI:status")
         self.file_data = "uid=1000(jjack3032) gid=1000(jjack3032) groups=1000(jjack3032),27(sudo)"
 
     # Test for a bad parser input.
